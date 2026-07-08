@@ -6,6 +6,9 @@ from django.contrib.auth.forms import AuthenticationForm
 
 def login_view(request):
     if request.method == 'POST' and 'username' in request.POST:
+        # Save selected country before session key rotation
+        prev_country = request.session.get('selected_country')
+        
         form = AuthenticationForm(request, data=request.POST)
         if form.is_valid():
             username = form.cleaned_data.get('username')
@@ -13,6 +16,8 @@ def login_view(request):
             user = authenticate(username=username, password=password)
             if user is not None:
                 login(request, user)
+                if prev_country:
+                    request.session['selected_country'] = prev_country
                 return redirect('dashboard_redirect')
             else:
                 messages.error(request, "Invalid username or password.")

@@ -362,6 +362,9 @@ def principal_dashboard(request):
     # Complaints
     complaints = Complaint.objects.filter(school=school).order_by('-created_at')[:5]
 
+    # Announcements
+    announcements = Announcement.objects.filter(school=school, target_role__in=['all', 'principal']).order_by('-created_at')[:5]
+
     # Fetch all unpaid/partially paid fees (overdue/outstanding late fees)
     overdue_fees = StudentFee.objects.filter(
         student__school=school,

@@ -15,7 +15,7 @@
     <div class="card-stat">
         <div class="stat-info">
             <p>Today's Collection</p>
-            <h3>${{ payments_today|floatformat:2 }}</h3>
+            <h3>{{ active_currency.symbol }}{{ payments_today|floatformat:2 }}</h3>
         </div>
         <div class="stat-icon bg-emerald">
             <i class="fa-solid fa-calculator"></i>
@@ -24,7 +24,7 @@
     <div class="card-stat">
         <div class="stat-info">
             <p>Total Dues Pending</p>
-            <h3>${{ total_due_amount|floatformat:2 }}</h3>
+            <h3>{{ active_currency.symbol }}{{ total_due_amount|floatformat:2 }}</h3>
         </div>
         <div class="stat-icon bg-amber">
             <i class="fa-solid fa-receipt"></i>
@@ -51,7 +51,7 @@
                             {% for fee in fs.fees.all %}
                                 {% if fee.status != 'paid' %}
                                     <option value="{{ fee.id }}">
-                                        {{ fs.user.get_full_name|default:fs.user.username }} - {{ fee.fee_structure.fee_type }} (Bal: ${{ fee.balance|floatformat:2 }})
+                                        {{ fs.user.get_full_name|default:fs.user.username }} - {{ fee.fee_structure.fee_type }} (Bal: {{ active_currency.symbol }}{{ fee.balance|floatformat:2 }})
                                     </option>
                                 {% endif %}
                             {% endfor %}
@@ -60,7 +60,7 @@
                 </div>
                 
                 <div class="form-group">
-                    <label for="amount_paid">Payment Amount ($)</label>
+                    <label for="amount_paid">Payment Amount ({{ active_currency.symbol }})</label>
                     <input type="number" step="0.01" name="amount_paid" id="amount_paid" class="form-control" placeholder="0.00" required>
                 </div>
 
@@ -110,7 +110,7 @@
                 </div>
 
                 <div class="form-group">
-                    <label for="discount_amount">Concession Discount Amount ($)</label>
+                    <label for="discount_amount">Concession Discount Amount ({{ active_currency.symbol }})</label>
                     <input type="number" step="0.01" name="discount_amount" id="discount_amount" class="form-control" placeholder="0.00" required>
                 </div>
 
@@ -146,7 +146,7 @@
                         <tr>
                             <td><code>{{ pm.receipt.receipt_number|default:"-" }}</code></td>
                             <td>{{ pm.student_fee.student.user.get_full_name|default:pm.student_fee.student.user.username }}</td>
-                            <td>${{ pm.amount_paid|floatformat:2 }}</td>
+                            <td>{{ active_currency.symbol }}{{ pm.amount_paid|floatformat:2 }}</td>
                             <td>{{ pm.payment_date|date:"M d, H:i" }}</td>
                         </tr>
                     {% empty %}
@@ -196,7 +196,7 @@
                         <tr>
                             <td>{{ conc.student.user.get_full_name|default:conc.student.user.username }}</td>
                             <td>{{ conc.fee_type }}</td>
-                            <td>${{ conc.discount_amount|floatformat:2 }}</td>
+                            <td>{{ active_currency.symbol }}{{ conc.discount_amount|floatformat:2 }}</td>
                             <td style="font-size: 12px; color: var(--text-muted);">{{ conc.reason }}</td>
                         </tr>
                     {% empty %}

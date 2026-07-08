@@ -12,7 +12,9 @@ from marks_app.models import Mark
 from finance.models import FeeStructure, StudentFee, Payment, Receipt
 from transport.models import Bus, Driver, Route, Stop, StudentBusAssignment
 from communication.models import Announcement, Complaint
+from reports.views import setup_student_academics_and_fees
 from leave_app.models import LeaveRequest
+
 
 class Command(BaseCommand):
     help = 'Seeds database with default subscription plans, starter/growth/premium schools, and full role profiles.'
@@ -569,7 +571,7 @@ class Command(BaseCommand):
             )
 
             # Create Student Profile
-            StudentProfile.objects.get_or_create(
+            student_prof, _ = StudentProfile.objects.get_or_create(
                 user=user,
                 defaults={
                     'school': school,
@@ -580,6 +582,9 @@ class Command(BaseCommand):
                     'parent': parent_prof
                 }
             )
+
+            # Initialize all academic fields, timetables, homeworks, exams, schedules, marks and fees using helper
+            setup_student_academics_and_fees(student_prof)
 
         # 7. Seed custom accountants
         self.stdout.write("Seeding custom accountants...")
