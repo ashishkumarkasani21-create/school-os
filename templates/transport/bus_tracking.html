@@ -113,9 +113,9 @@
         }
     {% endfor %}
 
-    // Custom bus icon (Self-contained vector SVG encoded to Base64)
+    // Custom yellow school bus vector SVG icon (completely self-contained, works offline)
     const busIcon = L.icon({
-        iconUrl: 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1MTIgNTEyIiB3aWR0aD0iMzYiIGhlaWdodD0iMzYiPgogIDxjaXJjbGUgY3g9Ij21NiIgY3k9Ij21NiIgcj0iMjQwIiBmaWxsPSIjNGY0NmU1Ii8+CiAgPHBhdGggZD0iTTM4MCAyODBoLTI0OHYtODBjMC0yMiAxOC00MCA0MC00MGgxNjhjMjIgMCA0MCAxOCA0MCA0MHY4MHoiIGZpbGw9IiNmYWNjMTUiLz4KICA8cmVjdCB4PSIxNTYiIHk9IjI4MCIgd2lkdGg9IjIwMCIgaGVpZ2h0PSI2MCIgZmlsbD0iI2Y1OWUwYiIvPgogIDxjaXJjbGUgY3g9IjE4MCIgY3k9IjM1MCIgcj0iMzAiIGZpbGw9IiMxZTI5M2IiLz4KICA8Y2lyY2xlIGN4PSIxODAiIGN5PSIzNTAiIHI9IjEyIiBmaWxsPSIjZTJlOGYwIi8+CiAgPGNpcmNsZSBjeD0iMzMyIiBjeT0iMzUwIiByPSIzMCIgZmlsbD0iIzFlMjkzYiIvPgogIDxjaXJjbGUgY3g9IjMzMiIgY3k9IjM1MCIgcj0iMTIiIGZpbGw9IiNlMmU4ZjAiLz4KICA8cmVjdCB4PSIxODAiIHk9IjIwMCIgd2lkdGg9IjUwIiBoZWlnaHQ9IjUwIiBmaWxsPSIjZTJlOGYwIiByeD0iNCIvPgogIDxyZWN0IHg9IjI4MiIgeT0iMjAwIiB3aWR0aD0iNTAiIGhlaWdodD0iNTAiIGZpbGw9IiNlMmU4ZjAiIHJ4PSI0Ii8+Cjwvc3ZnPg==',
+        iconUrl: 'data:image/svg+xml;utf8,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="36" height="36"><circle cx="256" cy="256" r="240" fill="#EAB308"/><path d="M122 182h268v156H122z" fill="#1e293b"/><path d="M142 202h228v116H142z" fill="#FACC15"/><rect x="182" y="222" width="50" height="50" fill="#334155" rx="4"/><rect x="280" y="222" width="50" height="50" fill="#334155" rx="4"/><circle cx="192" cy="358" r="24" fill="#0f172a"/><circle cx="320" cy="358" r="24" fill="#0f172a"/></svg>'),
         iconSize: [36, 36],
         iconAnchor: [18, 18],
         popupAnchor: [0, -18]
