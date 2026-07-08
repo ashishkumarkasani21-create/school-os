@@ -1,0 +1,210 @@
+{% extends 'base.html' %}
+
+{% block title %}Accountant Dashboard - School OS{% endblock %}
+
+{% block content %}
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 32px;">
+    <div>
+        <h1 style="font-size: 28px; font-weight: 800; letter-spacing: -0.5px;">Finance & Accounting Center</h1>
+        <p style="color: var(--text-muted); font-size: 14px;">Log student payments, issue receipts, and allocate fee concessions.</p>
+    </div>
+</div>
+
+<!-- Stats row -->
+<div class="grid-stats">
+    <div class="card-stat">
+        <div class="stat-info">
+            <p>Today's Collection</p>
+            <h3>${{ payments_today|floatformat:2 }}</h3>
+        </div>
+        <div class="stat-icon bg-emerald">
+            <i class="fa-solid fa-calculator"></i>
+        </div>
+    </div>
+    <div class="card-stat">
+        <div class="stat-info">
+            <p>Total Dues Pending</p>
+            <h3>${{ total_due_amount|floatformat:2 }}</h3>
+        </div>
+        <div class="stat-icon bg-amber">
+            <i class="fa-solid fa-receipt"></i>
+        </div>
+    </div>
+</div>
+
+<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;">
+    <!-- Column 1: Payment & Concession log forms -->
+    <div>
+        <!-- Log Payment Form -->
+        <div class="card">
+            <div class="card-header">
+                <span class="card-title"><i class="fa-solid fa-square-plus"></i> Record Student Payment</span>
+            </div>
+            
+            <form action="{% url 'record_payment' %}" method="post">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label for="student_fee_id">Select Unpaid/Partial Invoice</label>
+                    <select name="student_fee_id" id="student_fee_id" class="form-control" required>
+                        <option value="">-- Choose Invoice --</option>
+                        {% for fs in students %}
+                            {% for fee in fs.fees.all %}
+                                {% if fee.status != 'paid' %}
+                                    <option value="{{ fee.id }}">
+                                        {{ fs.user.get_full_name|default:fs.user.username }} - {{ fee.fee_structure.fee_type }} (Bal: ${{ fee.balance|floatformat:2 }})
+                                    </option>
+                                {% endif %}
+                            {% endfor %}
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="amount_paid">Payment Amount ($)</label>
+                    <input type="number" step="0.01" name="amount_paid" id="amount_paid" class="form-control" placeholder="0.00" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="payment_method">Payment Mode</label>
+                    <select name="payment_method" id="payment_method" class="form-control">
+                        <option value="cash">Cash</option>
+                        <option value="card">Credit/Debit Card</option>
+                        <option value="online">Online Banking</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="transaction_id">Transaction / Reference ID</label>
+                    <input type="text" name="transaction_id" id="transaction_id" class="form-control" placeholder="e.g. TXN-12903">
+                </div>
+
+                <button type="submit" class="btn btn-primary" style="width: 100%;">Post Payment & Issue Receipt</button>
+            </form>
+        </div>
+
+        <!-- Grant Concession Form -->
+        <div class="card">
+            <div class="card-header">
+                <span class="card-title"><i class="fa-solid fa-percent"></i> Grant Fee Concession</span>
+            </div>
+            
+            <form action="{% url 'assign_concession' %}" method="post">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label for="student_id">Select Student</label>
+                    <select name="student_id" id="student_id" class="form-control" required>
+                        <option value="">-- Choose Student --</option>
+                        {% for stud in students %}
+                            <option value="{{ stud.id }}">{{ stud.user.get_full_name|default:stud.user.username }} ({{ stud.student_id }})</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="fee_type">Fee Category</label>
+                    <select name="fee_type" id="fee_type" class="form-control" required>
+                        <option value="Tuition Fee">Tuition Fee</option>
+                        <option value="Transport Fee">Transport Fee</option>
+                        <option value="Exam Fee">Exam Fee</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="discount_amount">Concession Discount Amount ($)</label>
+                    <input type="number" step="0.01" name="discount_amount" id="discount_amount" class="form-control" placeholder="0.00" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="reason">Concession Authorization Reason</label>
+                    <textarea name="reason" id="reason" class="form-control" rows="2" placeholder="e.g. Merit-based scholarship or sibling discount" required></textarea>
+                </div>
+
+                <button type="submit" class="btn btn-primary" style="width: 100%;">Authorize Concession</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Column 2: Recent transactions and concession list -->
+    <div>
+        <!-- Recent Payments Ledger -->
+        <div class="card">
+            <div class="card-header">
+                <span class="card-title"><i class="fa-solid fa-clock-rotate-left"></i> Recent Payments Ledger</span>
+            </div>
+            
+            <table>
+                <thead>
+                    <tr>
+                        <th>Receipt No</th>
+                        <th>Student</th>
+                        <th>Amount</th>
+                        <th>Date</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for pm in recent_payments %}
+                        <tr>
+                            <td><code>{{ pm.receipt.receipt_number|default:"-" }}</code></td>
+                            <td>{{ pm.student_fee.student.user.get_full_name|default:pm.student_fee.student.user.username }}</td>
+                            <td>${{ pm.amount_paid|floatformat:2 }}</td>
+                            <td>{{ pm.payment_date|date:"M d, H:i" }}</td>
+                        </tr>
+                    {% empty %}
+                        <tr><td colspan="4" style="text-align: center; color: var(--text-muted);">No payments recorded yet.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- School OS Announcements -->
+        <div class="card">
+            <div class="card-header">
+                <span class="card-title"><i class="fa-solid fa-bullhorn"></i> School Board Announcements</span>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 12px;">
+                {% for ann in announcements %}
+                    <div style="background-color: var(--bg-primary); padding: 14px; border-radius: 8px; border-left: 3px solid var(--primary);">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+                            <strong style="font-size: 13px;">{{ ann.title }}</strong>
+                            <span style="font-size: 10px; color: var(--text-muted);">{{ ann.created_at|date:"M d" }}</span>
+                        </div>
+                        <p style="font-size: 12px; line-height: 1.4;">{{ ann.content }}</p>
+                    </div>
+                {% empty %}
+                    <p style="text-align: center; color: var(--text-muted); font-size: 12px; padding: 10px 0;">No active notices broadcast.</p>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Concessions list -->
+        <div class="card">
+            <div class="card-header">
+                <span class="card-title"><i class="fa-solid fa-tags"></i> Active Concessions Registry</span>
+            </div>
+            
+            <table>
+                <thead>
+                    <tr>
+                        <th>Student</th>
+                        <th>Category</th>
+                        <th>Discount</th>
+                        <th>Reason</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for conc in concessions %}
+                        <tr>
+                            <td>{{ conc.student.user.get_full_name|default:conc.student.user.username }}</td>
+                            <td>{{ conc.fee_type }}</td>
+                            <td>${{ conc.discount_amount|floatformat:2 }}</td>
+                            <td style="font-size: 12px; color: var(--text-muted);">{{ conc.reason }}</td>
+                        </tr>
+                    {% empty %}
+                        <tr><td colspan="4" style="text-align: center; color: var(--text-muted);">No concessions registered.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

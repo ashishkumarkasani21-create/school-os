@@ -1,0 +1,137 @@
+{% extends 'base.html' %}
+
+{% block title %}Review Digitized Document (OCR) - School OS{% endblock %}
+
+{% block content %}
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 32px;">
+    <div>
+        <h1 style="font-size: 28px; font-weight: 800; letter-spacing: -0.5px;">OCR Digitization Review</h1>
+        <p style="color: var(--text-muted); font-size: 14px;">Confirm parsed variables extracted from scans before executing database updates.</p>
+    </div>
+</div>
+
+<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;">
+    <!-- Left Column: Uploaded File & Raw Text -->
+    <div>
+        <div class="card">
+            <div class="card-header">
+                <span class="card-title"><i class="fa-solid fa-file-image"></i> Scanned Document File</span>
+            </div>
+            <div style="text-align: center; border: 1px dashed var(--border); padding: 20px; border-radius: 8px; margin-bottom: 20px; background-color: var(--bg-primary);">
+                <i class="fa-regular fa-file-pdf" style="font-size: 64px; color: var(--danger); margin-bottom: 12px;"></i>
+                <p style="font-size: 14px; font-weight: 600;">{{ doc.file.name }}</p>
+                <a href="{{ doc.file.url }}" target="_blank" class="btn btn-secondary" style="margin-top: 12px; padding: 6px 12px; font-size: 12px;">
+                    <i class="fa-solid fa-expand"></i> View Scan Fullscreen
+                </a>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <span class="card-title"><i class="fa-solid fa-align-left"></i> Extracted OCR Raw Text Stream</span>
+            </div>
+            <textarea class="form-control" rows="12" readonly style="font-family: monospace; font-size: 12px; background-color: var(--bg-primary); line-height: 1.5;">{{ extraction.extracted_text }}</textarea>
+        </div>
+    </div>
+
+    <!-- Right Column: Extracted Fields Review & Edit -->
+    <div>
+        <div class="card" style="border-top: 4px solid var(--primary);">
+            <div class="card-header">
+                <span class="card-title"><i class="fa-solid fa-square-check"></i> Parse Field Mapping Review</span>
+            </div>
+
+            <form action="." method="post">
+                {% csrf_token %}
+                
+                <h4 style="font-size: 13px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 16px; letter-spacing: 0.5px;">Extracted Variables</h4>
+                
+                {% if doc.document_type == 'admission' %}
+                    <div class="form-group">
+                        <label for="username">Portal Username / ID</label>
+                        <input type="text" name="username" id="username" class="form-control" value="{{ json_data.username }}" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="student_id">Official Student ID</label>
+                        <input type="text" name="student_id" id="student_id" class="form-control" value="{{ json_data.student_id }}" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="student_name">Student Name</label>
+                        <input type="text" name="student_name" id="student_name" class="form-control" value="{{ json_data.student_name }}" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="date_of_birth">Date of Birth (YYYY-MM-DD)</label>
+                        <input type="text" name="date_of_birth" id="date_of_birth" class="form-control" value="{{ json_data.date_of_birth }}" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="parent_name">Parent Name</label>
+                        <input type="text" name="parent_name" id="parent_name" class="form-control" value="{{ json_data.parent_name }}">
+                    </div>
+                    <div class="form-group">
+                        <label for="phone_number">Parent Contact Phone</label>
+                        <input type="text" name="phone_number" id="phone_number" class="form-control" value="{{ json_data.phone_number }}">
+                    </div>
+                    <div class="form-group">
+                        <label for="address">Address</label>
+                        <input type="text" name="address" id="address" class="form-control" value="{{ json_data.address }}">
+                    </div>
+                    <div class="form-group">
+                        <label for="class_applied">Grade Applied For</label>
+                        <input type="text" name="class_applied" id="class_applied" class="form-control" value="{{ json_data.class_applied }}" required>
+                    </div>
+
+                {% elif doc.document_type == 'marksheet' %}
+                    <div class="form-group">
+                        <label for="student_name">Student Name</label>
+                        <input type="text" name="student_name" id="student_name" class="form-control" value="{{ json_data.student_name }}" required>
+                    </div>
+                    
+                    <label style="font-size: 13px; font-weight: 700; color: var(--text-muted); margin: 16px 0 8px 0; display: block;">Parsed Marksheets Grid</label>
+                    <div style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 20px;">
+                        {% for subj in json_data.subjects %}
+                            <div style="display: flex; gap: 8px; align-items: center;">
+                                <input type="text" name="subject_name_{{ forloop.counter }}" class="form-control" value="{{ subj.name }}" placeholder="Subject" required>
+                                <input type="number" name="subject_marks_{{ forloop.counter }}" class="form-control" value="{{ subj.marks }}" placeholder="Marks" style="width: 100px;" required>
+                            </div>
+                        {% endfor %}
+                    </div>
+
+                    <div class="form-group">
+                        <label for="total_marks">Total Marks</label>
+                        <input type="number" name="total_marks" id="total_marks" class="form-control" value="{{ json_data.total_marks }}">
+                    </div>
+                    <div class="form-group">
+                        <label for="percentage">Percentage (%)</label>
+                        <input type="number" step="0.01" name="percentage" id="percentage" class="form-control" value="{{ json_data.percentage }}">
+                    </div>
+
+                {% elif doc.document_type == 'receipt' %}
+                    <div class="form-group">
+                        <label for="student_name">Student Name</label>
+                        <input type="text" name="student_name" id="student_name" class="form-control" value="{{ json_data.student_name }}" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="receipt_number">Receipt Serial Number</label>
+                        <input type="text" name="receipt_number" id="receipt_number" class="form-control" value="{{ json_data.receipt_number }}" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="amount">Payment Amount Received ($)</label>
+                        <input type="number" step="0.01" name="amount" id="amount" class="form-control" value="{{ json_data.amount }}" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="date">Payment Date (YYYY-MM-DD)</label>
+                        <input type="text" name="date" id="date" class="form-control" value="{{ json_data.date }}" required>
+                    </div>
+                {% endif %}
+
+                <div style="display: flex; gap: 12px; margin-top: 32px;">
+                    <button type="submit" name="save_changes" class="btn btn-secondary" style="flex: 1;">Save Changes</button>
+                    <button type="submit" name="approve_integrate" class="btn btn-primary" style="flex: 2;">
+                        <i class="fa-solid fa-circle-check"></i> Approve & Integrate Database
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

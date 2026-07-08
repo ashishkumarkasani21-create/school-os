@@ -1,0 +1,175 @@
+{% extends 'base.html' %}
+
+{% block title %}Subscription Plans - School OS{% endblock %}
+
+{% block content %}
+<!-- Alert Messages -->
+{% if messages %}
+    {% for message in messages %}
+        <div style="background-color: rgba(34, 197, 94, 0.1); border: 1px solid rgba(34, 197, 94, 0.3); color: #4ade80; padding: 16px; border-radius: 8px; margin-bottom: 24px; font-weight: 600; font-size: 14px;">
+            <i class="fa-solid fa-circle-check"></i> {{ message }}
+        </div>
+    {% endfor %}
+{% endif %}
+
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 32px; flex-wrap: wrap; gap: 16px; border-bottom: 1px solid var(--border); padding-bottom: 24px;">
+    <div>
+        <h1 style="font-size: 28px; font-weight: 800; letter-spacing: -0.5px; margin-bottom: 6px; background: linear-gradient(135deg, var(--primary), var(--accent)); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
+            School OS Subscription Plans
+        </h1>
+        <p style="color: var(--text-muted); font-size: 14px;">
+            Active School: <strong>{{ school.name }}</strong> | Current Tier: <span class="badge-premium" style="text-transform: uppercase;">{{ school_plan }}</span>
+        </p>
+    </div>
+
+    <!-- Country / Currency Selection Dropdown -->
+    <div style="display: flex; align-items: center; gap: 12px; background: var(--bg-secondary); padding: 10px 16px; border-radius: 10px; border: 1px solid var(--border);">
+        <label for="country-selector" style="font-size: 13px; font-weight: 700; color: var(--text-muted); display: flex; align-items: center; gap: 6px;">
+            <i class="fa-solid fa-globe" style="color: var(--accent);"></i> Country/Market:
+        </label>
+        <form id="country-form" method="get" action=".">
+            <select name="country" id="country-selector" onchange="document.getElementById('country-form').submit()" style="background: var(--bg-primary); border: 1px solid var(--border); color: var(--text-main); font-size: 13px; font-weight: 700; padding: 6px 12px; border-radius: 6px; outline: none; cursor: pointer;">
+                {% for key, val in country_currencies.items %}
+                    <option value="{{ key }}" {% if key == selected_country %}selected{% endif %}>{{ val.name }} ({{ val.symbol }})</option>
+                {% endfor %}
+            </select>
+        </form>
+    </div>
+</div>
+
+<div style="text-align: center; margin-bottom: 48px;">
+    <p style="color: var(--text-muted); font-size: 15px; max-width: 600px; margin: 0 auto; line-height: 1.6;">
+        Demonstrate active role-based gating and dashboard modules instantly by activating any tier below for your school.
+    </p>
+</div>
+
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 24px; align-items: stretch; margin-bottom: 48px;">
+    <!-- Silver Plan -->
+    <div class="card" style="border-top: 6px solid #94a3b8; display: flex; flex-direction: column; justify-content: space-between; position: relative; overflow: hidden; background: var(--bg-secondary); box-shadow: var(--shadow);">
+        <div>
+            <h2 style="font-size: 20px; font-weight: 800; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 16px; text-align: center;">
+                Silver
+            </h2>
+            <div style="text-align: center; margin-bottom: 24px;">
+                <span style="font-size: 28px; font-weight: 800; color: var(--text-main);">{{ active_currency.symbol }} {{ active_currency.silver }}</span>
+                <span style="font-size: 13px; color: var(--text-muted); display: block; margin-top: 4px;">+ {{ active_currency.tax }} (billed yearly)</span>
+            </div>
+            
+            <div style="border-top: 1px solid var(--border); padding-top: 20px; margin-bottom: 24px;">
+                <ul style="list-style: none; padding: 0; display: flex; flex-direction: column; gap: 12px; font-size: 13px;">
+                    <li><i class="fa-solid fa-check text-success" style="margin-right: 8px;"></i> 21 Core Modules</li>
+                    <li><i class="fa-solid fa-check text-success" style="margin-right: 8px;"></i> 17 Standard Modules</li>
+                    <li><i class="fa-solid fa-check text-success" style="margin-right: 8px;"></i> Student & Teacher Portals</li>
+                    <li><i class="fa-solid fa-check text-success" style="margin-right: 8px;"></i> Basic Attendance logs</li>
+                    <li><i class="fa-solid fa-check text-success" style="margin-right: 8px;"></i> Homework Desk tracker</li>
+                    <li><i class="fa-solid fa-check text-success" style="margin-right: 8px;"></i> Public Board notices</li>
+                </ul>
+            </div>
+        </div>
+
+        <div>
+            {% if school_plan == 'silver' %}
+                <button class="btn" style="width: 100%; background-color: rgba(148, 163, 184, 0.2); color: #cbd5e1; border: 1px solid #94a3b8; font-weight: 700; cursor: default;" disabled>
+                    <i class="fa-solid fa-circle-check"></i> Active Plan
+                </button>
+            {% else %}
+                <form action="." method="post">
+                    {% csrf_token %}
+                    <input type="hidden" name="plan_code" value="silver">
+                    <button type="submit" class="btn btn-secondary" style="width: 100%; font-weight: 700; border-color: #94a3b8; color: #94a3b8;">
+                        Activate Silver
+                    </button>
+                </form>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Gold Plan -->
+    <div class="card" style="border-top: 6px solid #fbbf24; border-color: #fbbf24; display: flex; flex-direction: column; justify-content: space-between; position: relative; overflow: hidden; background: var(--bg-secondary); box-shadow: 0 10px 25px -5px rgba(245, 158, 11, 0.1);">
+        <!-- Most Popular Badge -->
+        <div style="position: absolute; top: 12px; right: -32px; background-color: #fbbf24; color: #0b0f19; font-size: 10px; font-weight: 800; text-transform: uppercase; padding: 4px 32px; transform: rotate(45deg); letter-spacing: 0.5px;">
+            Popular
+        </div>
+
+        <div>
+            <h2 style="font-size: 20px; font-weight: 800; color: #fbbf24; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 16px; text-align: center;">
+                Gold
+            </h2>
+            <div style="text-align: center; margin-bottom: 24px;">
+                <span style="font-size: 28px; font-weight: 800; color: var(--text-main);">{{ active_currency.symbol }} {{ active_currency.gold }}</span>
+                <span style="font-size: 13px; color: var(--text-muted); display: block; margin-top: 4px;">+ {{ active_currency.tax }} (billed yearly)</span>
+            </div>
+            
+            <div style="border-top: 1px solid var(--border); padding-top: 20px; margin-bottom: 24px;">
+                <ul style="list-style: none; padding: 0; display: flex; flex-direction: column; gap: 12px; font-size: 13px;">
+                    <li><i class="fa-solid fa-check text-success" style="margin-right: 8px;"></i> <strong>All Silver Plan features</strong></li>
+                    <li><i class="fa-solid fa-check text-success" style="margin-right: 8px;"></i> Accountant Command Desk</li>
+                    <li><i class="fa-solid fa-check text-success" style="margin-right: 8px;"></i> Leave Request workflow</li>
+                    <li><i class="fa-solid fa-check text-success" style="margin-right: 8px;"></i> Exam Scheduling & Grades</li>
+                    <li><i class="fa-solid fa-check text-success" style="margin-right: 8px;"></i> Class Timetable layouts</li>
+                    <li><i class="fa-solid fa-check text-success" style="margin-right: 8px;"></i> Static transport stop info</li>
+                </ul>
+            </div>
+        </div>
+
+        <div>
+            {% if school_plan == 'gold' %}
+                <button class="btn" style="width: 100%; background-color: rgba(245, 158, 11, 0.2); color: #fbbf24; border: 1px solid #fbbf24; font-weight: 700; cursor: default;" disabled>
+                    <i class="fa-solid fa-circle-check"></i> Active Plan
+                </button>
+            {% else %}
+                <form action="." method="post">
+                    {% csrf_token %}
+                    <input type="hidden" name="plan_code" value="gold">
+                    <button type="submit" class="btn btn-secondary" style="width: 100%; font-weight: 700; border-color: #fbbf24; color: #fbbf24;">
+                        Activate Gold
+                    </button>
+                </form>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Platinum Plan -->
+    <div class="card" style="border-top: 6px solid #22d3ee; display: flex; flex-direction: column; justify-content: space-between; position: relative; overflow: hidden; background: var(--bg-secondary); box-shadow: var(--shadow);">
+        <div>
+            <h2 style="font-size: 20px; font-weight: 800; color: #22d3ee; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 16px; text-align: center;">
+                Platinum
+            </h2>
+            <div style="text-align: center; margin-bottom: 24px;">
+                <span style="font-size: 28px; font-weight: 800; color: var(--text-main);">{{ active_currency.symbol }} {{ active_currency.platinum }}</span>
+                <span style="font-size: 13px; color: var(--text-muted); display: block; margin-top: 4px;">+ {{ active_currency.tax }} (billed yearly)</span>
+            </div>
+            
+            <div style="border-top: 1px solid var(--border); padding-top: 20px; margin-bottom: 24px;">
+                <ul style="list-style: none; padding: 0; display: flex; flex-direction: column; gap: 12px; font-size: 13px;">
+                    <li><i class="fa-solid fa-check text-success" style="margin-right: 8px;"></i> <strong>All Gold Plan features</strong></li>
+                    <li><i class="fa-solid fa-check text-success" style="margin-right: 8px;"></i> Live GPS Map Bus Tracking</li>
+                    <li><i class="fa-solid fa-check text-success" style="margin-right: 8px;"></i> Premium OCR scan validation</li>
+                    <li><i class="fa-solid fa-check text-success" style="margin-right: 8px;"></i> Principal command dashboard</li>
+                    <li><i class="fa-solid fa-check text-success" style="margin-right: 8px;"></i> Advanced performance analytics</li>
+                    <li><i class="fa-solid fa-check text-success" style="margin-right: 8px;"></i> Full audit logs registry</li>
+                </ul>
+            </div>
+        </div>
+
+        <div>
+            {% if school_plan == 'platinum' %}
+                <button class="btn" style="width: 100%; background-color: rgba(34, 211, 238, 0.2); color: #22d3ee; border: 1px solid #22d3ee; font-weight: 700; cursor: default;" disabled>
+                    <i class="fa-solid fa-circle-check"></i> Active Plan
+                </button>
+            {% else %}
+                <form action="." method="post">
+                    {% csrf_token %}
+                    <input type="hidden" name="plan_code" value="platinum">
+                    <button type="submit" class="btn btn-secondary" style="width: 100%; font-weight: 700; border-color: #22d3ee; color: #22d3ee;">
+                        Activate Platinum
+                    </button>
+                </form>
+            {% endif %}
+        </div>
+    </div>
+
+</div>
+
+{% endblock %}
+

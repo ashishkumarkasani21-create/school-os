@@ -1,0 +1,659 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}School OS{% endblock %}</title>
+    <!-- Fonts & Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --bg-primary: #f8fafc;
+            --bg-secondary: #ffffff;
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+            --primary: #4f46e5;
+            --primary-light: #e0e7ff;
+            --accent: #06b6d4;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --border: #e2e8f0;
+            --glass-bg: rgba(255, 255, 255, 0.7);
+            --glass-blur: blur(12px);
+            --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+        }
+
+        body.dark-mode {
+            --bg-primary: #0b0f19;
+            --bg-secondary: #111827;
+            --text-main: #f9fafb;
+            --text-muted: #9ca3af;
+            --primary: #6366f1;
+            --primary-light: #1e1b4b;
+            --accent: #22d3ee;
+            --success: #34d399;
+            --warning: #fbbf24;
+            --danger: #f87171;
+            --border: #374151;
+            --glass-bg: rgba(17, 24, 39, 0.7);
+            --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.5);
+            --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.5);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+            transition: background-color 0.2s, border-color 0.2s, color 0.1s;
+        }
+
+        body {
+            background-color: var(--bg-primary);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+        }
+
+        /* Sidebar navigation */
+        .sidebar {
+            width: 260px;
+            background-color: var(--bg-secondary);
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            position: fixed;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            z-index: 100;
+            transition: transform 0.3s ease;
+        }
+
+        .sidebar-brand {
+            padding: 24px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .sidebar-brand i {
+            font-size: 24px;
+            color: var(--primary);
+        }
+
+        .brand-text {
+            font-weight: 800;
+            font-size: 20px;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .sidebar-menu {
+            list-style: none;
+            padding: 20px 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            flex-grow: 1;
+            overflow-y: auto;
+        }
+
+        .menu-link {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            color: var(--text-muted);
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 500;
+            font-size: 14px;
+        }
+
+        .menu-link:hover, .menu-link.active {
+            background-color: var(--primary-light);
+            color: var(--primary);
+        }
+
+        .menu-link.active i {
+            color: var(--primary);
+        }
+
+        .badge-premium {
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+            color: white;
+            font-size: 10px;
+            padding: 2px 6px;
+            border-radius: 4px;
+            margin-left: auto;
+            font-weight: 700;
+        }
+
+        .badge-growth {
+            background: linear-gradient(135deg, #3b82f6, #2563eb);
+            color: white;
+            font-size: 10px;
+            padding: 2px 6px;
+            border-radius: 4px;
+            margin-left: auto;
+            font-weight: 700;
+        }
+
+        .sidebar-footer {
+            padding: 16px;
+            border-top: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: var(--primary);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+        }
+
+        .user-info {
+            display: flex;
+            flex-direction: column;
+            max-width: 140px;
+        }
+
+        .user-name {
+            font-size: 13px;
+            font-weight: 600;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .user-role {
+            font-size: 11px;
+            color: var(--text-muted);
+            text-transform: capitalize;
+        }
+
+        /* Main Panel */
+        .main-panel {
+            margin-left: 260px;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        .navbar {
+            height: 70px;
+            background-color: var(--glass-bg);
+            backdrop-filter: var(--glass-blur);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 32px;
+            position: sticky;
+            top: 0;
+            z-index: 90;
+        }
+
+        .nav-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .school-badge {
+            background-color: var(--primary-light);
+            color: var(--primary);
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .nav-right {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .theme-toggle {
+            cursor: pointer;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-muted);
+            border: 1px solid var(--border);
+        }
+
+        .theme-toggle:hover {
+            color: var(--primary);
+            border-color: var(--primary);
+        }
+
+        .btn-logout {
+            padding: 8px 16px;
+            border: 1px solid var(--danger);
+            color: var(--danger);
+            border-radius: 8px;
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-logout:hover {
+            background-color: var(--danger);
+            color: white;
+        }
+
+        /* Content Container */
+        .content {
+            padding: 32px;
+            flex-grow: 1;
+        }
+
+        /* Messages */
+        .message-container {
+            margin-bottom: 24px;
+        }
+
+        .alert {
+            padding: 12px 18px;
+            border-radius: 8px;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .alert-success {
+            background-color: #ecfdf5;
+            color: #065f46;
+            border: 1px solid #a7f3d0;
+        }
+
+        .alert-error {
+            background-color: #fef2f2;
+            color: #991b1b;
+            border: 1px solid #fca5a5;
+        }
+
+        .alert-warning {
+            background-color: #fffbeb;
+            color: #92400e;
+            border: 1px solid #fde68a;
+        }
+
+        /* Responsive Grid & Cards */
+        .grid-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 24px;
+            margin-bottom: 32px;
+        }
+
+        .card-stat {
+            background-color: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: var(--shadow);
+        }
+
+        .stat-info h3 {
+            font-size: 28px;
+            font-weight: 800;
+            margin-top: 4px;
+        }
+
+        .stat-info p {
+            color: var(--text-muted);
+            font-size: 13px;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .stat-icon {
+            width: 52px;
+            height: 52px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+        }
+
+        .bg-indigo { background-color: #e0e7ff; color: #4f46e5; }
+        .bg-cyan { background-color: #ecfeff; color: #0891b2; }
+        .bg-emerald { background-color: #d1fae5; color: #059669; }
+        .bg-amber { background-color: #fef3c7; color: #d97706; }
+
+        /* General Forms & Tables */
+        .card {
+            background-color: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 24px;
+            box-shadow: var(--shadow);
+        }
+
+        .card-header {
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .card-title {
+            font-size: 18px;
+            font-weight: 700;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+        }
+
+        th, td {
+            padding: 14px 16px;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+
+        th {
+            font-weight: 600;
+            color: var(--text-muted);
+            background-color: var(--bg-primary);
+        }
+
+        tr:hover td {
+            background-color: var(--bg-primary);
+        }
+
+        /* Buttons & Forms */
+        .btn {
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            border: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            color: white;
+        }
+
+        .btn-primary:hover {
+            opacity: 0.9;
+        }
+
+        .btn-secondary {
+            background-color: var(--border);
+            color: var(--text-main);
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 10px 14px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            background-color: var(--bg-primary);
+            color: var(--text-main);
+            font-size: 14px;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .text-success { color: var(--success); }
+        .text-warning { color: var(--warning); }
+        .text-danger { color: var(--danger); }
+
+        @media (max-width: 992px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+            .sidebar.active {
+                transform: translateX(0);
+            }
+            .main-panel {
+                margin-left: 0 !important;
+            }
+            .navbar {
+                padding: 0 16px !important;
+            }
+            .content {
+                padding: 16px !important;
+            }
+            .sidebar-toggle {
+                display: flex !important;
+            }
+            .sidebar-close {
+                display: block !important;
+            }
+        }
+    </style>
+    {% block extra_head %}{% endblock %}
+</head>
+<body>
+
+    <!-- Sidebar Drawer -->
+    <div class="sidebar">
+        <div class="sidebar-brand" style="justify-content: space-between; display: flex; align-items: center;">
+            <div style="display: flex; align-items: center; gap: 12px;">
+                <i class="fa-solid fa-graduation-cap"></i>
+                <span class="brand-text">School OS</span>
+            </div>
+            <button class="sidebar-close" onclick="toggleSidebar()" style="display: none; background: none; border: none; color: var(--text-muted); font-size: 20px; cursor: pointer;">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+        
+        <ul class="sidebar-menu">
+            {% if request.user.is_authenticated %}
+                <li>
+                    <a href="{% url 'dashboard_redirect' %}" class="menu-link active">
+                        <i class="fa-solid fa-table-columns"></i>
+                        <span>Dashboard</span>
+                    </a>
+                </li>
+
+                <!-- Plan Gated Features in Menu -->
+                <li>
+                    <a href="{% url 'bus_tracking_map' %}" class="menu-link">
+                        <i class="fa-solid fa-bus"></i>
+                        <span>Bus Tracking</span>
+                        {% if school_plan == 'silver' %}
+                            <span class="badge-premium">Premium</span>
+                        {% elif school_plan == 'gold' %}
+                            <span class="badge-premium">Premium</span>
+                        {% endif %}
+                    </a>
+                </li>
+
+                <!-- OCR uploading and integration review -->
+                <li>
+                    <a href="#" onclick="document.getElementById('ocr-upload-modal').style.display='block'" class="menu-link">
+                        <i class="fa-solid fa-expand"></i>
+                        <span>OCR Upload</span>
+                        {% if school_plan == 'silver' %}
+                            <span class="badge-growth">Gold</span>
+                        {% endif %}
+                    </a>
+                </li>
+
+                <!-- SaaS Subscription Plans -->
+                <li>
+                    <a href="{% url 'subscription_plans_view' %}" class="menu-link" style="border-top: 1px dashed rgba(255,255,255,0.1); margin-top: 8px; padding-top: 12px;">
+                        <i class="fa-solid fa-gem" style="color: #fbbf24;"></i>
+                        <span style="font-weight: 700; color: #fbbf24;">Manage Subscription</span>
+                    </a>
+                </li>
+            {% endif %}
+        </ul>
+
+        {% if request.user.is_authenticated %}
+            <div class="sidebar-footer">
+                <div class="user-avatar">
+                    {{ request.user.username|slice:":1"|upper }}
+                </div>
+                <div class="user-info">
+                    <span class="user-name">{{ request.user.get_full_name|default:request.user.username }}</span>
+                    <span class="user-role">{{ request.user.role }}</span>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- Main Content Panel -->
+    <div class="main-panel">
+        <nav class="navbar">
+            <div class="nav-left">
+                <button class="sidebar-toggle" onclick="toggleSidebar()" style="display: none; background: none; border: none; color: var(--text-main); font-size: 20px; cursor: pointer; margin-right: 12px; align-items: center; justify-content: center;">
+                    <i class="fa-solid fa-bars"></i>
+                </button>
+                {% if current_school %}
+                    <span class="school-badge">
+                        <i class="fa-solid fa-school"></i> {{ current_school.name }} (Plan: {{ current_school.plan.name }})
+                    </span>
+                {% endif %}
+            </div>
+            
+            <div class="nav-right">
+                <div class="theme-toggle" onclick="toggleDarkMode()">
+                    <i class="fa-solid fa-moon"></i>
+                </div>
+                {% if request.user.is_authenticated %}
+                    <a href="{% url 'logout' %}" class="btn-logout">
+                        <i class="fa-solid fa-sign-out-alt"></i> Logout
+                    </a>
+                {% endif %}
+            </div>
+        </nav>
+
+        <div class="content">
+            <!-- Messages Banner -->
+            {% if messages %}
+                <div class="message-container">
+                    {% for message in messages %}
+                        <div class="alert alert-{% if message.tags == 'error' %}error{% elif message.tags == 'success' %}success{% else %}warning{% endif %}">
+                            <i class="fa-solid {% if message.tags == 'error' %}fa-circle-xmark{% else %}fa-circle-check{% endif %}"></i>
+                            <span>{{ message }}</span>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+
+            {% block content %}{% endblock %}
+        </div>
+    </div>
+
+    <!-- Universal OCR Upload modal -->
+    {% if request.user.is_authenticated %}
+    <div id="ocr-upload-modal" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(0,0,0,0.6); z-index: 1000; align-items: center; justify-content: center; display: none;">
+        <div class="card" style="width: 500px; margin: 15% auto; background-color: var(--bg-secondary);">
+            <div class="card-header">
+                <span class="card-title">Upload Document for OCR Extraction</span>
+                <span style="cursor: pointer;" onclick="document.getElementById('ocr-upload-modal').style.display='none'"><i class="fa-solid fa-xmark"></i></span>
+            </div>
+            
+            {% if school_plan == 'starter' %}
+                <div class="alert alert-warning">
+                    <i class="fa-solid fa-lock"></i>
+                    <span>OCR processing is locked. Upgrade to **Growth** or **Premium** to enable scanned admissions, marksheets, and payment receipts digitization!</span>
+                </div>
+            {% else %}
+                <form action="{% url 'upload_ocr' %}" method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <label for="document_type">Document Category</label>
+                        <select name="document_type" id="document_type" class="form-control" required>
+                            <option value="admission">Student Admission Form</option>
+                            <option value="marksheet">Marksheet / Grade Grid</option>
+                            <option value="receipt">Fee Payment Receipt</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="document_file">Scanned Image / PDF</label>
+                        <input type="file" name="document_file" id="document_file" class="form-control" accept="image/*,application/pdf" required>
+                    </div>
+                    <div style="display: flex; justify-content: flex-end; gap: 12px; margin-top: 20px;">
+                        <button type="button" class="btn btn-secondary" onclick="document.getElementById('ocr-upload-modal').style.display='none'">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Process Document</button>
+                    </div>
+                </form>
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
+
+    <script>
+        // Theme switching helper
+        function toggleDarkMode() {
+            document.body.classList.toggle('dark-mode');
+            const isDark = document.body.classList.contains('dark-mode');
+            localStorage.setItem('theme', isDark ? 'dark' : 'light');
+            document.querySelector('.theme-toggle i').className = isDark ? 'fa-solid fa-sun' : 'fa-solid fa-moon';
+        }
+
+        // Auto load theme
+        document.addEventListener('DOMContentLoaded', () => {
+            const savedTheme = localStorage.getItem('theme');
+            if (savedTheme === 'dark') {
+                document.body.classList.add('dark-mode');
+                document.querySelector('.theme-toggle i').className = 'fa-solid fa-sun';
+            }
+        });
+
+        function toggleSidebar() {
+            document.querySelector('.sidebar').classList.toggle('active');
+        }
+    </script>
+</body>
+</html>

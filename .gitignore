@@ -1,0 +1,54 @@
+﻿# Python
+__pycache__/
+*.py[cod]
+*.so
+*.egg
+*.egg-info/
+dist/
+build/
+
+# Django
+*.log
+local_settings.py
+db.sqlite3
+db.sqlite3-journal
+media/
+
+# Virtual Environment
+env/
+venv/
+ENV/
+.venv/
+
+# Environment variables
+.env
+.env.local
+.env.production
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Static files collected
+staticfiles/
+static_collected/
+
+# Coverage / Testing
+htmlcov/
+.coverage
+.pytest_cache/
+
+# Temp
+*.tmp
+*.bak
+*.swp
+
+# AI Agent artifacts
+artifacts/
+*.webp
+*.metadata.json

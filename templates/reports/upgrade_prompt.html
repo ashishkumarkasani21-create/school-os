@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+
+{% block title %}Feature Locked - Upgrade Plan{% endblock %}
+
+{% block content %}
+<div class="card" style="text-align: center; padding: 48px; max-width: 650px; margin: 40px auto; border-top: 5px solid #f59e0b;">
+    <div style="font-size: 64px; color: #f59e0b; margin-bottom: 24px;">
+        <i class="fa-solid fa-gem"></i>
+    </div>
+    
+    <h2 style="font-size: 24px; font-weight: 800; margin-bottom: 12px;">Premium Feature Locked</h2>
+    <p style="color: var(--text-muted); font-size: 15px; line-height: 1.6; margin-bottom: 32px;">
+        The requested feature/dashboard is not included in your school's current plan. To access this module, your school administration must upgrade to the <strong>{{ plan_required }}</strong> subscription package.
+    </p>
+
+    <div style="background-color: var(--bg-primary); border: 1px solid var(--border); border-radius: 12px; padding: 24px; margin-bottom: 32px; text-align: left;">
+        <h3 style="font-size: 16px; font-weight: 700; margin-bottom: 16px;">SaaS Plan Matrix Details</h3>
+        
+        <div style="display: flex; flex-direction: column; gap: 12px;">
+            <div style="display: flex; justify-content: space-between; font-size: 13px;">
+                <strong>Starter Plan ($49/mo)</strong>
+                <span style="color: var(--text-muted);">Attendance, Homework, Announcements</span>
+            </div>
+            <hr style="border: 0; border-top: 1px solid var(--border);">
+            <div style="display: flex; justify-content: space-between; font-size: 13px;">
+                <strong>Growth Plan ($149/mo)</strong>
+                <span style="color: var(--primary);">Principal command, Accountant ledger, Timetables, Basic OCR</span>
+            </div>
+            <hr style="border: 0; border-top: 1px solid var(--border);">
+            <div style="display: flex; justify-content: space-between; font-size: 13px;">
+                <strong>Premium Plan ($299/mo)</strong>
+                <span style="color: var(--accent);">Full OCR automation, Live Map tracking, Advanced analytics, Audit logs</span>
+            </div>
+        </div>
+    </div>
+
+    <div style="display: flex; justify-content: center; gap: 16px;">
+        <a href="{% url 'dashboard_redirect' %}" class="btn btn-secondary">Return to Dashboard</a>
+        <button class="btn btn-primary" onclick="alert('Subscription upgrade invoice sent to school administrator!')">Request Upgrade</button>
+    </div>
+</div>
+{% endblock %}

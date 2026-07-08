@@ -1,0 +1,354 @@
+{% extends 'base.html' %}
+
+{% block title %}Admin Control Center - School OS{% endblock %}
+
+{% block content %}
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 32px;">
+    <div>
+        <h1 style="font-size: 28px; font-weight: 800; letter-spacing: -0.5px;">Admin Control Center</h1>
+        <p style="color: var(--text-muted); font-size: 14px;">Manage user roles, configure system parameters, and broadcast notices.</p>
+    </div>
+    <div style="display: flex; gap: 12px;">
+        <span class="school-badge" style="padding: 8px 16px; font-size: 13px;">
+            <i class="fa-solid fa-layer-group"></i> Active Subscription: <strong>{{ school.plan.name }}</strong>
+        </span>
+    </div>
+</div>
+
+<!-- Stats row -->
+<div class="grid-stats">
+    <div class="card-stat">
+        <div class="stat-info">
+            <p>Students Registered</p>
+            <h3>{{ total_students }}</h3>
+        </div>
+        <div class="stat-icon bg-indigo">
+            <i class="fa-solid fa-user-graduate"></i>
+        </div>
+    </div>
+    <div class="card-stat">
+        <div class="stat-info">
+            <p>Faculty Members</p>
+            <h3>{{ total_teachers }}</h3>
+        </div>
+        <div class="stat-icon bg-cyan">
+            <i class="fa-solid fa-chalkboard-user"></i>
+        </div>
+    </div>
+    <div class="card-stat">
+        <div class="stat-info">
+            <p>Finance Officers</p>
+            <h3>{{ total_accountants }}</h3>
+        </div>
+        <div class="stat-icon bg-emerald">
+            <i class="fa-solid fa-file-invoice-dollar"></i>
+        </div>
+    </div>
+    <div class="card-stat">
+        <div class="stat-info">
+            <p>Active Bus Fleet</p>
+            <h3>{{ active_buses }}</h3>
+        </div>
+        <div class="stat-icon bg-amber">
+            <i class="fa-solid fa-bus"></i>
+        </div>
+    </div>
+</div>
+
+<div style="display: grid; grid-template-columns: 2fr 1fr; gap: 24px;">
+    <!-- Left Column: User directories -->
+    <div>
+        <div class="card">
+            <div class="card-header">
+                <span class="card-title"><i class="fa-solid fa-users"></i> Registered Accounts Directories</span>
+            </div>
+            
+            <div style="margin-bottom: 16px; display: flex; gap: 8px; flex-wrap: wrap;">
+                <button class="btn btn-primary" onclick="showTab('students-tab')" id="btn-students-tab">Students</button>
+                <button class="btn btn-secondary" onclick="showTab('teachers-tab')" id="btn-teachers-tab">Teachers</button>
+                <button class="btn btn-secondary" onclick="showTab('accountants-tab')" id="btn-accountants-tab">Accountants</button>
+                <button class="btn btn-secondary" onclick="showTab('classes-tab')" id="btn-classes-tab">Classes & Sections</button>
+            </div>
+
+            <!-- Students Tab -->
+            <div id="students-tab" class="dir-tab">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Student ID</th>
+                            <th>Name</th>
+                            <th>Class/Section</th>
+                            <th>Roll No</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for stu in students %}
+                            <tr>
+                                <td><code>{{ stu.student_id }}</code></td>
+                                <td>{{ stu.user.get_full_name|default:stu.user.username }}</td>
+                                <td>{{ stu.class_room|default:"Unassigned" }}</td>
+                                <td>{{ stu.roll_number|default:"-" }}</td>
+                                <td><span class="text-success"><i class="fa-solid fa-circle-check"></i> Active</span></td>
+                            </tr>
+                        {% empty %}
+                            <tr><td colspan="5" style="text-align: center; color: var(--text-muted);">No student profiles found. Use OCR Admission Form to upload a student scan!</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Teachers Tab -->
+            <div id="teachers-tab" class="dir-tab" style="display: none;">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Employee ID</th>
+                            <th>Name</th>
+                            <th>Designation</th>
+                            <th>Credentials</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for tch in teachers %}
+                            <tr>
+                                <td><code>{{ tch.employee_id }}</code></td>
+                                <td>{{ tch.user.get_full_name|default:tch.user.username }}</td>
+                                <td>{{ tch.designation }}</td>
+                                <td>{{ tch.user.email }}</td>
+                            </tr>
+                        {% empty %}
+                            <tr><td colspan="4" style="text-align: center; color: var(--text-muted);">No teachers found.</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Accountants Tab -->
+            <div id="accountants-tab" class="dir-tab" style="display: none;">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Employee ID</th>
+                            <th>Name</th>
+                            <th>Access Level</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for acc in accountants %}
+                            <tr>
+                                <td><code>{{ acc.employee_id }}</code></td>
+                                <td>{{ acc.user.get_full_name|default:acc.user.username }}</td>
+                                <td>Finance Lead</td>
+                            </tr>
+                        {% empty %}
+                            <tr><td colspan="3" style="text-align: center; color: var(--text-muted);">No accountants found.</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Classes & Sections Tab -->
+            <div id="classes-tab" class="dir-tab" style="display: none;">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Class Name</th>
+                            <th>Section</th>
+                            <th>Class Teacher</th>
+                            <th>Student Count</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for cls in classes %}
+                            <tr>
+                                <td><strong>{{ cls.name }}</strong></td>
+                                <td><span class="badge-growth" style="background: rgba(99,102,241,0.1); color: var(--primary); padding: 4px 10px; margin-left: 0;">{{ cls.section }}</span></td>
+                                <td>
+                                    {% if cls.class_teacher %}
+                                        <i class="fa-solid fa-chalkboard-user" style="color: var(--accent); margin-right: 6px;"></i>
+                                        {{ cls.class_teacher.user.get_full_name|default:cls.class_teacher.user.username }}
+                                    {% else %}
+                                        <span style="color: var(--text-muted); font-style: italic;">Unassigned</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <span class="badge-premium" style="background: rgba(34,211,238,0.1); color: #22d3ee; padding: 4px 8px; margin-left: 0;">
+                                        {{ cls.students.count }} Students
+                                    </span>
+                                </td>
+                            </tr>
+                        {% empty %}
+                            <tr><td colspan="4" style="text-align: center; color: var(--text-muted);">No classes configured. Use the Class Creator form to register classes!</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Right Column: Quick controls & Announcements -->
+    <div>
+        <!-- Create User Account -->
+        <div class="card" style="border-top: 3px solid var(--accent);">
+            <div class="card-header">
+                <span class="card-title"><i class="fa-solid fa-user-plus"></i> Register User Account</span>
+            </div>
+            <form action="." method="post">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label for="create_username">Username / ID</label>
+                    <input type="text" name="create_username" id="create_username" class="form-control" required placeholder="e.g. janesmith">
+                </div>
+                <div class="form-group">
+                    <label for="create_password">Password</label>
+                    <input type="password" name="create_password" id="create_password" class="form-control" required placeholder="••••••••">
+                </div>
+                <div class="form-group">
+                    <label for="create_name">Full Name</label>
+                    <input type="text" name="create_name" id="create_name" class="form-control" required placeholder="e.g. Jane Smith">
+                </div>
+                <div class="form-group">
+                    <label for="create_role">Role</label>
+                    <select name="create_role" id="create_role" class="form-control" onchange="toggleAdminClassSelect(this.value)">
+                        <option value="student">Student</option>
+                        <option value="teacher">Teacher</option>
+                        <option value="accountant">Accountant</option>
+                        <option value="principal">Principal</option>
+                    </select>
+                </div>
+                <div class="form-group" id="admin-class-select-group">
+                    <label for="student_class">Assign Class Room</label>
+                    <select name="student_class" id="student_class" class="form-control">
+                        <option value="">-- Choose Class --</option>
+                        {% for cls in classes %}
+                            <option value="{{ cls.id }}">{{ cls.name }} - {{ cls.section }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <button type="submit" class="btn btn-primary" style="width: 100%;">Register Account</button>
+            </form>
+        </div>
+
+        <script>
+            function toggleAdminClassSelect(role) {
+                const group = document.getElementById('admin-class-select-group');
+                if (role === 'student') {
+                    group.style.display = 'block';
+                } else {
+                    group.style.display = 'none';
+                }
+            }
+        </script>
+
+        <!-- Create Class & Section -->
+        <div class="card" style="border-top: 3px solid var(--primary);">
+            <div class="card-header">
+                <span class="card-title"><i class="fa-solid fa-folder-plus"></i> Create Class & Section</span>
+            </div>
+            <form action="." method="post">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label for="create_class_name">Class Name</label>
+                    <input type="text" name="create_class_name" id="create_class_name" class="form-control" required placeholder="e.g. Grade 11">
+                </div>
+                <div class="form-group">
+                    <label for="create_class_section">Section Code</label>
+                    <input type="text" name="create_class_section" id="create_class_section" class="form-control" required placeholder="e.g. B">
+                </div>
+                <button type="submit" class="btn btn-primary" style="width: 100%;">Create Class Room</button>
+            </form>
+        </div>
+
+        <!-- Assign Class Teacher -->
+        <div class="card" style="border-top: 3px solid var(--success);">
+            <div class="card-header">
+                <span class="card-title"><i class="fa-solid fa-user-tie"></i> Assign Class Teacher</span>
+            </div>
+            <form action="." method="post">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label for="assign_class_id">Select Class</label>
+                    <select name="assign_class_id" id="assign_class_id" class="form-control" required>
+                        <option value="">-- Choose Class --</option>
+                        {% for cls in classes %}
+                            <option value="{{ cls.id }}">{{ cls.name }} - {{ cls.section }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="assign_teacher_id">Select Class Teacher</label>
+                    <select name="assign_teacher_id" id="assign_teacher_id" class="form-control">
+                        <option value="">-- Unassigned (None) --</option>
+                        {% for tch in teachers %}
+                            <option value="{{ tch.id }}">{{ tch.user.get_full_name|default:tch.user.username }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <button type="submit" class="btn btn-primary" style="width: 100%;">Assign Class Teacher</button>
+            </form>
+        </div>
+
+        <!-- Notice Broadcaster -->
+        <div class="card">
+            <div class="card-header">
+                <span class="card-title"><i class="fa-solid fa-bullhorn"></i> Notice Broadcaster</span>
+            </div>
+            <form action="." method="post">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label for="announce_title">Subject</label>
+                    <input type="text" name="announce_title" id="announce_title" class="form-control" required placeholder="e.g. Weather Alert">
+                </div>
+                <div class="form-group">
+                    <label for="announce_target">Target Role</label>
+                    <select name="announce_target" id="announce_target" class="form-control">
+                        <option value="all">Everyone</option>
+                        <option value="teacher">Teachers Only</option>
+                        <option value="student">Students Only</option>
+                        <option value="parent">Parents Only</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="announce_content">Announcement Details</label>
+                    <textarea name="announce_content" id="announce_content" class="form-control" rows="4" required placeholder="Write message here..."></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary" style="width: 100%;">Broadcast Announcement</button>
+            </form>
+        </div>
+
+        <!-- Recent Notices -->
+        <div class="card">
+            <div class="card-header">
+                <span class="card-title"><i class="fa-solid fa-clock-rotate-left"></i> Recent Broadcasts</span>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 12px;">
+                {% for ann in announcements %}
+                    <div style="background-color: var(--bg-primary); padding: 12px; border-radius: 8px; border-left: 3px solid var(--primary);">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+                            <strong style="font-size: 13px;">{{ ann.title }}</strong>
+                            <span style="font-size: 10px; color: var(--text-muted);">{{ ann.created_at|date:"M d" }}</span>
+                        </div>
+                        <p style="font-size: 11px; color: var(--text-muted);">Target: <span style="text-transform: capitalize;">{{ ann.target_role }}</span></p>
+                    </div>
+                {% empty %}
+                    <p style="text-align: center; color: var(--text-muted); font-size: 12px;">No announcements sent.</p>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function showTab(tabId) {
+        document.querySelectorAll('.dir-tab').forEach(tab => tab.style.display = 'none');
+        document.getElementById(tabId).style.display = 'block';
+
+        // Toggle buttons active state
+        document.querySelectorAll('[id^="btn-"]').forEach(btn => {
+            btn.className = 'btn btn-secondary';
+        });
+        document.getElementById('btn-' + tabId).className = 'btn btn-primary';
+    }
+</script>
+{% endblock %}

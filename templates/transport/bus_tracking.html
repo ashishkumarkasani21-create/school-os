@@ -1,0 +1,154 @@
+{% extends 'base.html' %}
+
+{% block title %}Live Bus Location - School OS{% endblock %}
+
+{% block extra_head %}
+<!-- Leaflet Maps CSS & JS -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<style>
+    @media (max-width: 992px) {
+        .bus-grid {
+            grid-template-columns: 1fr !important;
+        }
+        #map {
+            height: 380px !important;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 32px;">
+    <div>
+        <h1 style="font-size: 28px; font-weight: 800; letter-spacing: -0.5px;">School Transport GPS</h1>
+        <p style="color: var(--text-muted); font-size: 14px;">Track active school buses, ETA coordinates, and pickup schedules.</p>
+    </div>
+</div>
+
+<div class="bus-grid" style="display: grid; grid-template-columns: 3fr 1fr; gap: 24px;">
+    <!-- Map Canvas Side -->
+    <div>
+        <div class="card" style="padding: 12px; position: relative;">
+            <!-- Map container -->
+            <div id="map" style="height: 550px; border-radius: 8px; z-index: 1;"></div>
+            
+            <!-- Plan Gating Alert if not Premium -->
+            {% if not has_premium_tracking %}
+                <div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(8px); z-index: 10; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 40px; border-radius: 12px;">
+                    <div style="font-size: 52px; color: #fbbf24; margin-bottom: 20px;">
+                        <i class="fa-solid fa-map-location-dot"></i>
+                    </div>
+                    <h3 style="color: white; font-size: 20px; font-weight: 800; margin-bottom: 12px;">Real-Time GPS Tracking Locked</h3>
+                    <p style="color: #cbd5e1; font-size: 14px; max-width: 450px; line-height: 1.6; margin-bottom: 24px;">
+                        Your school is currently on the <strong>{{ school_plan|title }}</strong> plan. Live map movement tracking, active ETAs, and driver coordinates are exclusive Platinum features.
+                    </p>
+                    <button class="btn btn-primary" onclick="alert('Upgrade invoice request triggered for school administrator.')">Upgrade to Platinum</button>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Details/Stops Panel -->
+    <div>
+        <div class="card">
+            <div class="card-header">
+                <span class="card-title"><i class="fa-solid fa-route"></i> Active School Routes</span>
+            </div>
+            
+            <div style="display: flex; flex-direction: column; gap: 16px;">
+                {% for route in routes %}
+                    <div style="background-color: var(--bg-primary); padding: 14px; border-radius: 8px; border: 1px solid var(--border);">
+                        <strong style="font-size: 14px; display: block;">{{ route.name }}</strong>
+                        <span style="font-size: 12px; color: var(--text-muted); display: block; margin-top: 4px;">
+                            Bus: <strong>{{ route.bus.bus_number|default:"-" }}</strong> | Driver: {{ route.driver.name|default:"-" }}
+                        </span>
+                        
+                        <div style="margin-top: 12px; border-left: 2px dashed var(--border); padding-left: 12px; display: flex; flex-direction: column; gap: 8px;">
+                            {% for stop in route.stops.all %}
+                                <div style="position: relative; font-size: 12px;">
+                                    <div style="width: 8px; height: 8px; border-radius: 50%; background-color: var(--primary); position: absolute; left: -17px; top: 4px;"></div>
+                                    <span>{{ stop.name }}</span>
+                                    <span style="float: right; color: var(--text-muted);">{{ stop.arrival_time|time:"H:i" }}</span>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                {% empty %}
+                    <p style="text-align: center; color: var(--text-muted); font-size: 13px;">No bus routes configured.</p>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+
+{% if has_premium_tracking %}
+<script>
+    // Initialize map centered at selected country center coordinates
+    const map = L.map('map').setView([{{ map_center_lat }}, {{ map_center_lng }}], 13);
+    
+    // Add modern map layer
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
+    }).addTo(map);
+
+    // Initialize bus markers map
+    const busMarkers = {};
+    const routePaths = {};
+
+    // Seeded route stops coordinate mapping for drawing route lines on the Leaflet canvas
+    {% for route in routes %}
+        const coords_{{ route.id }} = [];
+        {% for stop in route.stops.all %}
+            coords_{{ route.id }}.push([{{ stop.latitude }} + {{ offset_lat }}, {{ stop.longitude }} + {{ offset_lng }}]);
+        {% endfor %}
+        
+        if (coords_{{ route.id }}.length > 0) {
+            // Draw route polyline
+            routePaths[{{ route.id }}] = L.polyline(coords_{{ route.id }}, {
+                color: '#6366f1',
+                weight: 4,
+                opacity: 0.6
+            }).addTo(map);
+        }
+    {% endfor %}
+
+    // Custom bus icon
+    const busIcon = L.icon({
+        iconUrl: 'https://cdn-icons-png.flaticon.com/512/3418/3418886.png', // school bus flat icon
+        iconSize: [36, 36],
+        iconAnchor: [18, 18],
+        popupAnchor: [0, -18]
+    });
+
+    // Polling function for each bus
+    function pollBusLocations() {
+        {% for bus in buses %}
+            fetch("{% url 'get_bus_live_coords' bus.id %}")
+                .then(res => res.json())
+                .then(data => {
+                    if (data.status === 'live') {
+                        const lat = data.latitude;
+                        const lng = data.longitude;
+                        
+                        if (busMarkers[{{ bus.id }}]) {
+                            // Update marker coordinates
+                            busMarkers[{{ bus.id }}].setLatLng([lat, lng]);
+                        } else {
+                            // Create new marker
+                            busMarkers[{{ bus.id }}] = L.marker([lat, lng], {icon: busIcon})
+                                .addTo(map)
+                                .bindPopup(`<b>Bus {{ bus.bus_number }}</b><br>Near: ${data.current_stop}<br>Next: ${data.next_stop}<br>ETA: ${data.eta_next}`);
+                        }
+                    }
+                })
+                .catch(err => console.error("GPS polling error: ", err));
+        {% endfor %}
+    }
+
+    // Start live tracking loop (every 3 seconds)
+    pollBusLocations();
+    setInterval(pollBusLocations, 3000);
+</script>
+{% endif %}
+{% endblock %}

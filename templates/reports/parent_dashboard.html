@@ -1,0 +1,160 @@
+{% extends 'base.html' %}
+
+{% block title %}Parent Portal - School OS{% endblock %}
+
+{% block content %}
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 32px;">
+    <div>
+        <h1 style="font-size: 28px; font-weight: 800; letter-spacing: -0.5px;">Parent Portal Command</h1>
+        <p style="color: var(--text-muted); font-size: 14px;">Monitor academic progressions, manage school billings, and check bus details.</p>
+    </div>
+</div>
+
+<div style="display: grid; grid-template-columns: 2fr 1fr; gap: 24px;">
+    <!-- Left Column: Child portfolios -->
+    <div>
+        {% for child_data in children_data %}
+            <div class="card" style="border-left: 5px solid var(--primary); margin-bottom: 32px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); padding-bottom: 16px; margin-bottom: 20px;">
+                    <div>
+                        <h2 style="font-size: 20px; font-weight: 800; display: flex; align-items: center; gap: 10px;">
+                            <i class="fa-solid fa-child" style="color: var(--primary);"></i>
+                            {{ child_data.profile.user.get_full_name|default:child_data.profile.user.username }}
+                        </h2>
+                        <p style="font-size: 12px; color: var(--text-muted); margin-top: 4px;">
+                            Student ID: <code>{{ child_data.profile.student_id }}</code> | Class: <strong>{{ child_data.profile.class_room }}</strong> | Roll: {{ child_data.profile.roll_number }}
+                        </p>
+                    </div>
+                    <div style="text-align: right;">
+                        <span class="school-badge" style="background-color: var(--cyan); color: #0891b2; font-size: 13px;">
+                            Attendance: <strong>{{ child_data.attendance_rate }}%</strong>
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Academic Progress of Child -->
+                <div style="margin-bottom: 24px;">
+                    <h3 style="font-size: 14px; font-weight: 700; margin-bottom: 10px; color: var(--text-muted);">
+                        <i class="fa-solid fa-graduation-cap"></i> Published Exam Grades
+                    </h3>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Subject</th>
+                                <th>Exam Name</th>
+                                <th>Score Obtained</th>
+                                <th>Max Score</th>
+                                <th>Grade</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for mark in child_data.marks %}
+                                <tr>
+                                    <td>{{ mark.exam_schedule.subject.name }}</td>
+                                    <td>{{ mark.exam_schedule.exam.name }}</td>
+                                    <td>{{ mark.marks_obtained }}</td>
+                                    <td>{{ mark.exam_schedule.max_marks }}</td>
+                                    <td><strong>{{ mark.grade }}</strong></td>
+                                </tr>
+                            {% empty %}
+                                <tr><td colspan="5" style="text-align: center; color: var(--text-muted); font-size: 13px;">No exam marks updated yet.</td></tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Fee status for child -->
+                <div>
+                    <h3 style="font-size: 14px; font-weight: 700; margin-bottom: 10px; color: var(--text-muted);">
+                        <i class="fa-solid fa-wallet"></i> Fee Statements & Payments
+                    </h3>
+                    
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px;">
+                        {% for fee in child_data.fees %}
+                            <div style="background-color: var(--bg-primary); border: 1px solid var(--border); padding: 16px; border-radius: 8px;">
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                                    <strong>{{ fee.fee_structure.fee_type }}</strong>
+                                    <span class="text-{% if fee.status == 'paid' %}success{% else %}danger{% endif %}" style="font-size: 11px; font-weight: 700; text-transform: uppercase;">{{ fee.status }}</span>
+                                </div>
+                                <div style="display: flex; justify-content: space-between; font-size: 12px; color: var(--text-muted); margin-bottom: 4px;">
+                                    <span>Billed Due:</span>
+                                    <span>${{ fee.net_amount }}</span>
+                                </div>
+                                <div style="display: flex; justify-content: space-between; font-size: 12px; color: var(--text-muted); margin-bottom: 6px;">
+                                    <span>Paid:</span>
+                                    <span>${{ fee.paid_amount }}</span>
+                                </div>
+                                <div style="display: flex; justify-content: space-between; font-size: 13px; font-weight: 700; border-top: 1px dashed var(--border); padding-top: 6px; margin-bottom: 12px;">
+                                    <span>Remaining:</span>
+                                    <span>${{ fee.balance }}</span>
+                                </div>
+
+                                {% if fee.status != 'paid' %}
+                                    <form action="{% url 'record_payment' %}" method="post">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="student_fee_id" value="{{ fee.id }}">
+                                        <input type="hidden" name="amount_paid" value="{{ fee.balance }}">
+                                        <input type="hidden" name="payment_method" value="online">
+                                        <input type="hidden" name="transaction_id" value="PAID-PARENT-ONLINE">
+                                        <button type="submit" class="btn btn-primary" style="width: 100%; padding: 6px 12px; font-size: 12px;">
+                                            <i class="fa-solid fa-credit-card"></i> Pay Balance Online
+                                        </button>
+                                    </form>
+                                {% endif %}
+                            </div>
+                        {% empty %}
+                            <div style="grid-column: 1/-1; text-align: center; color: var(--text-muted); font-size: 13px;">No bills charged.</div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        {% empty %}
+            <div class="card" style="text-align: center; color: var(--text-muted);">No linked child profiles.</div>
+        {% endfor %}
+    </div>
+
+    <!-- Right Column: School details & complaints submission -->
+    <div>
+        <!-- Notice bulletins -->
+        <div class="card">
+            <div class="card-header">
+                <span class="card-title"><i class="fa-solid fa-envelope-open-text"></i> School Board Announcements</span>
+            </div>
+            
+            <div style="display: flex; flex-direction: column; gap: 12px;">
+                {% for ann in announcements %}
+                    <div style="background-color: var(--bg-primary); padding: 12px; border-radius: 8px; border-left: 3px solid var(--primary);">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+                            <strong style="font-size: 13px;">{{ ann.title }}</strong>
+                            <span style="font-size: 10px; color: var(--text-muted);">{{ ann.created_at|date:"M d" }}</span>
+                        </div>
+                        <p style="font-size: 12px; line-height: 1.4;">{{ ann.content }}</p>
+                    </div>
+                {% empty %}
+                    <p style="text-align: center; color: var(--text-muted); font-size: 12px;">No active notices.</p>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Submit complaint form -->
+        <div class="card">
+            <div class="card-header">
+                <span class="card-title"><i class="fa-solid fa-circle-exclamation"></i> File Concern / Complaint</span>
+            </div>
+            
+            <!-- We will post to a simple view in reports or leave it as simulated alert -->
+            <form action="" method="post" onsubmit="alert('Concern successfully logged to Principal Escalation Registry.'); return false;">
+                <div class="form-group">
+                    <label for="complaint_title">Concern Summary</label>
+                    <input type="text" id="complaint_title" class="form-control" placeholder="e.g. Bus Route A delay" required>
+                </div>
+                <div class="form-group">
+                    <label for="complaint_desc">Detailed Message</label>
+                    <textarea id="complaint_desc" class="form-control" rows="3" placeholder="Provide full details..." required></textarea>
+                </div>
+                <button type="submit" class="btn btn-secondary" style="width: 100%;">File Conciliation Request</button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>School OS - Portal Login</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #6366f1;
+            --primary-light: #818cf8;
+            --accent: #06b6d4;
+            --accent-light: #22d3ee;
+            --text: #f8fafc;
+            --text-muted: #94a3b8;
+            --border: rgba(255,255,255,0.08);
+        }
+        * { margin:0; padding:0; box-sizing:border-box; font-family:Inter,sans-serif; }
+        body {
+            min-height:100vh; display:flex; align-items:center; justify-content:center;
+            padding:20px; color:var(--text); position:relative; overflow:hidden;
+            background:#020817;
+        }
+
+        /* ── Aurora ── */
+        .aurora-bg {
+            position:fixed; inset:0; z-index:0;
+            background:
+                radial-gradient(ellipse 70% 50% at 20% 40%, rgba(99,102,241,0.22) 0%, transparent 60%),
+                radial-gradient(ellipse 60% 40% at 80% 70%, rgba(6,182,212,0.18) 0%, transparent 60%),
+                radial-gradient(ellipse 50% 60% at 60% 10%, rgba(139,92,246,0.15) 0%, transparent 55%),
+                radial-gradient(ellipse 50% 40% at 10% 80%, rgba(236,72,153,0.1) 0%, transparent 60%);
+            animation:aurora 18s ease-in-out infinite alternate;
+        }
+        @keyframes aurora {
+            0%   { transform:translate(0,0) scale(1); }
+            50%  { transform:translate(-25px,18px) scale(1.02); }
+            100% { transform:translate(18px,-22px) scale(0.98); }
+        }
+
+        /* ── Mesh grid ── */
+        .mesh-grid {
+            position:fixed; inset:0; z-index:0;
+            background-image:
+                linear-gradient(rgba(99,102,241,0.04) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(99,102,241,0.04) 1px, transparent 1px);
+            background-size:60px 60px;
+            animation:mesh 40s linear infinite;
+        }
+        @keyframes mesh { 100%{ background-position:60px 60px; } }
+
+        /* ── Blobs ── */
+        .blob { position:fixed; border-radius:50%; filter:blur(80px); z-index:0; pointer-events:none; }
+        .blob-1 {
+            width:700px; height:700px;
+            background:radial-gradient(circle, rgba(99,102,241,0.28), transparent 70%);
+            top:-280px; left:-260px;
+            animation:b1 22s ease-in-out infinite alternate;
+        }
+        .blob-2 {
+            width:600px; height:600px;
+            background:radial-gradient(circle, rgba(6,182,212,0.22), transparent 70%);
+            bottom:-220px; right:-200px;
+            animation:b2 28s ease-in-out infinite alternate;
+        }
+        .blob-3 {
+            width:450px; height:450px;
+            background:radial-gradient(circle, rgba(139,92,246,0.2), transparent 70%);
+            top:38%; right:12%;
+            animation:b3 33s ease-in-out infinite alternate;
+        }
+        @keyframes b1 { 0%{transform:translate(0,0) scale(1)} 100%{transform:translate(80px,60px) scale(1.1)} }
+        @keyframes b2 { 0%{transform:translate(0,0) scale(1)} 100%{transform:translate(-60px,-80px) scale(0.92)} }
+        @keyframes b3 { 0%{transform:translate(0,0) scale(1)} 100%{transform:translate(50px,-55px) scale(1.06)} }
+
+        /* ── Stars ── */
+        .stars { position:fixed; inset:0; z-index:0; }
+        .star {
+            position:absolute; border-radius:50%; background:white; opacity:0;
+            animation:twinkle linear infinite;
+        }
+        @keyframes twinkle { 0%,100%{opacity:0} 50%{opacity:0.75} }
+
+        /* ── Card ── */
+        .login-wrapper {
+            position:relative; z-index:10;
+            display:flex; max-width:960px; width:100%;
+            background:rgba(8,14,35,0.75);
+            backdrop-filter:blur(28px) saturate(180%);
+            -webkit-backdrop-filter:blur(28px) saturate(180%);
+            border:1px solid rgba(255,255,255,0.1);
+            border-radius:24px; overflow:hidden;
+            box-shadow:
+                0 0 0 1px rgba(99,102,241,0.15),
+                0 40px 80px -20px rgba(0,0,0,0.75),
+                0 0 100px rgba(99,102,241,0.07);
+            animation:card-in 0.55s cubic-bezier(0.16,1,0.3,1) both;
+        }
+        @keyframes card-in {
+            from{opacity:0;transform:translateY(28px) scale(0.97)}
+            to{opacity:1;transform:translateY(0) scale(1)}
+        }
+
+        /* ── Form side ── */
+        .form-side {
+            flex:1; padding:50px 46px;
+            display:flex; flex-direction:column; justify-content:center; min-width:0;
+        }
+        .brand { display:flex; align-items:center; gap:14px; margin-bottom:38px; }
+        .brand-icon {
+            width:48px; height:48px;
+            background:linear-gradient(135deg,var(--primary),var(--accent));
+            border-radius:14px; display:flex; align-items:center; justify-content:center;
+            font-size:22px; box-shadow:0 4px 24px rgba(99,102,241,0.5);
+            animation:icon-pulse 3s ease-in-out infinite;
+        }
+        @keyframes icon-pulse {
+            0%,100%{box-shadow:0 4px 24px rgba(99,102,241,0.5)}
+            50%{box-shadow:0 4px 36px rgba(99,102,241,0.75),0 0 50px rgba(6,182,212,0.25)}
+        }
+        .brand-name {
+            font-size:21px; font-weight:800;
+            background:linear-gradient(135deg,var(--primary-light),var(--accent-light));
+            -webkit-background-clip:text; -webkit-text-fill-color:transparent;
+        }
+        .brand-tag {
+            font-size:10px; color:var(--text-muted); font-weight:500;
+            letter-spacing:1.8px; text-transform:uppercase;
+        }
+        h1.headline { font-size:27px; font-weight:800; letter-spacing:-0.5px; margin-bottom:6px; }
+        .subline { color:var(--text-muted); font-size:13px; margin-bottom:28px; line-height:1.6; }
+
+        /* Country bar */
+        .country-bar {
+            display:flex; align-items:center; justify-content:space-between;
+            background:rgba(255,255,255,0.03); border:1px solid var(--border);
+            border-radius:10px; padding:10px 14px; margin-bottom:22px; gap:10px;
+        }
+        .country-bar label {
+            font-size:11px; font-weight:600; color:var(--text-muted);
+            display:flex; align-items:center; gap:6px; white-space:nowrap;
+        }
+        .country-bar label i { color:var(--accent-light); }
+        .country-select {
+            background:rgba(0,0,0,0.4); border:1px solid rgba(255,255,255,0.12);
+            color:var(--text); font-size:11px; font-weight:700;
+            padding:5px 10px; border-radius:7px; outline:none; cursor:pointer; transition:border-color .2s;
+        }
+        .country-select:hover { border-color:var(--primary); }
+
+        /* Inputs */
+        .form-group { margin-bottom:16px; }
+        .form-group label { display:block; font-size:11.5px; font-weight:600; color:var(--text-muted); margin-bottom:7px; }
+        .input-wrap { position:relative; }
+        .input-wrap i {
+            position:absolute; left:14px; top:50%; transform:translateY(-50%);
+            color:var(--text-muted); font-size:13px; pointer-events:none;
+        }
+        .form-input {
+            width:100%; padding:13px 14px 13px 40px;
+            background:rgba(255,255,255,0.05); border:1px solid var(--border);
+            border-radius:10px; color:var(--text); font-size:14px;
+            transition:border-color .2s,box-shadow .2s,background .2s;
+        }
+        .form-input::placeholder { color:rgba(148,163,184,0.4); }
+        .form-input:focus {
+            outline:none; border-color:var(--primary);
+            background:rgba(99,102,241,0.06); box-shadow:0 0 0 3px rgba(99,102,241,0.15);
+        }
+
+        .btn-login {
+            width:100%; padding:14px;
+            background:linear-gradient(135deg,var(--primary) 0%,#7c3aed 50%,var(--accent) 100%);
+            background-size:200% 200%; border:none; border-radius:10px; color:white;
+            font-size:15px; font-weight:700; cursor:pointer; margin-top:8px;
+            position:relative; overflow:hidden;
+            transition:transform .2s,box-shadow .2s,background-position .4s;
+            box-shadow:0 4px 24px rgba(99,102,241,0.45);
+        }
+        .btn-login::after {
+            content:''; position:absolute; inset:0;
+            background:linear-gradient(135deg,rgba(255,255,255,0.18),transparent);
+            opacity:0; transition:opacity .2s;
+        }
+        .btn-login:hover { transform:translateY(-2px); box-shadow:0 8px 36px rgba(99,102,241,0.65); background-position:right center; }
+        .btn-login:hover::after { opacity:1; }
+        .btn-login:active { transform:translateY(0); }
+
+        .alert-error {
+            background:rgba(239,68,68,0.1); border:1px solid rgba(239,68,68,0.3);
+            color:#f87171; padding:11px 14px; border-radius:8px; font-size:13px;
+            margin-bottom:16px; display:flex; align-items:center; gap:8px;
+        }
+
+        /* ── Demo panel ── */
+        .demo-side {
+            width:360px; flex-shrink:0;
+            background:rgba(255,255,255,0.02); border-left:1px solid var(--border);
+            padding:32px 24px; display:flex; flex-direction:column;
+            overflow-y:auto; max-height:640px;
+        }
+        .demo-hdr { font-size:13px; font-weight:700; margin-bottom:16px; display:flex; align-items:center; gap:8px; }
+        .demo-hdr i { color:var(--accent-light); }
+
+        .tier-group {
+            margin-bottom:14px; border-radius:12px; border:1px solid var(--border);
+            overflow:hidden; transition:border-color .2s;
+        }
+        .tier-group:hover { border-color:rgba(255,255,255,0.18); }
+        .tier-header { display:flex; align-items:center; justify-content:space-between; padding:11px 14px; font-size:12px; font-weight:700; }
+        .tier-name { color:var(--text); }
+        .tier-badge { font-size:9px; padding:3px 9px; border-radius:20px; font-weight:800; text-transform:uppercase; letter-spacing:0.5px; }
+
+        .tier-silver .tier-header { background:rgba(148,163,184,0.07); }
+        .badge-silver { background:linear-gradient(135deg,#64748b,#94a3b8); color:#fff; }
+        .tier-gold .tier-header { background:rgba(245,158,11,0.07); }
+        .badge-gold { background:linear-gradient(135deg,#d97706,#fbbf24); color:#1a0d00; }
+        .tier-platinum .tier-header { background:rgba(6,182,212,0.07); }
+        .badge-platinum { background:linear-gradient(135deg,#0891b2,#22d3ee); color:#001520; }
+        .price-tag { font-size:8.5px; color:rgba(255,255,255,0.5); font-weight:400; margin-left:3px; }
+
+        .role-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:6px; padding:10px 14px 12px; background:rgba(0,0,0,0.22); }
+        .role-pill {
+            background:rgba(255,255,255,0.04); border:1px solid var(--border);
+            padding:7px 4px; border-radius:8px; font-size:10px; cursor:pointer;
+            text-align:center; color:var(--text-muted); font-weight:500; transition:all .18s;
+        }
+        .role-pill:hover { background:rgba(99,102,241,0.15); border-color:rgba(99,102,241,0.4); color:var(--text); transform:translateY(-1px); }
+        .role-pill:active { transform:translateY(0); }
+
+        .pw-hint {
+            text-align:center; font-size:10px; color:var(--text-muted);
+            margin-top:10px; padding:8px 12px;
+            background:rgba(255,255,255,0.02); border:1px solid var(--border); border-radius:8px;
+        }
+        .pw-hint code { font-family:monospace; color:var(--accent-light); font-weight:700; }
+
+        @media(max-width:768px){
+            .login-wrapper{flex-direction:column;max-width:480px}
+            .demo-side{width:100%;max-height:none;border-left:none;border-top:1px solid var(--border)}
+            .form-side{padding:36px 28px}
+        }
+        @media(max-width:420px){
+            .form-side{padding:28px 18px}
+            .demo-side{padding:22px 18px}
+        }
+    </style>
+</head>
+<body>
+    <div class="aurora-bg"></div>
+    <div class="mesh-grid"></div>
+    <div class="blob blob-1"></div>
+    <div class="blob blob-2"></div>
+    <div class="blob blob-3"></div>
+    <div class="stars" id="stars"></div>
+
+    <div class="login-wrapper">
+        <!-- Left: Form -->
+        <div class="form-side">
+            <div class="brand">
+                <div class="brand-icon"><i class="fa-solid fa-graduation-cap"></i></div>
+                <div>
+                    <div class="brand-name">School OS</div>
+                    <div class="brand-tag">Management Platform</div>
+                </div>
+            </div>
+
+            <h1 class="headline">Welcome Back</h1>
+            <p class="subline">Sign in to access your institutional dashboard and modules.</p>
+
+            <!-- Country/Currency selector — uses GET so no CSRF needed -->
+            <form id="country-form" method="get" action=".">
+                <div class="country-bar">
+                    <label for="csel">
+                        <i class="fa-solid fa-earth-asia"></i> Region / Currency
+                    </label>
+                    <select name="country" id="csel" class="country-select"
+                        onchange="document.getElementById('country-form').submit()">
+                        {% for key, val in country_currencies.items %}
+                            <option value="{{ key }}" {% if key == selected_country %}selected{% endif %}>
+                                {{ val.name }} ({{ val.symbol }})
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </form>
+
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert-error">
+                        <i class="fa-solid fa-circle-exclamation"></i> {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+
+            <form action="{% url 'login' %}" method="post">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label for="username">Username</label>
+                    <div class="input-wrap">
+                        <i class="fa-solid fa-user"></i>
+                        <input type="text" name="username" id="username" class="form-input"
+                            placeholder="e.g. admin_gold_beacon" required autocomplete="username">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <div class="input-wrap">
+                        <i class="fa-solid fa-lock"></i>
+                        <input type="password" name="password" id="password" class="form-input"
+                            placeholder="&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;" required autocomplete="current-password">
+                    </div>
+                </div>
+                <button type="submit" class="btn-login">
+                    <i class="fa-solid fa-arrow-right-to-bracket" style="margin-right:8px"></i>Sign In to Portal
+                </button>
+            </form>
+        </div>
+
+        <!-- Right: Demo Accounts -->
+        <div class="demo-side">
+            <div class="demo-hdr">
+                <i class="fa-solid fa-wand-magic-sparkles"></i> Demo Accounts
+            </div>
+
+            <!-- Silver -->
+            <div class="tier-group tier-silver">
+                <div class="tier-header">
+                    <span class="tier-name">Primary Stars School</span>
+                    <span class="tier-badge badge-silver">Silver<span class="price-tag"> {{ active_currency.symbol }}{{ active_currency.silver }}/yr</span></span>
+                </div>
+                <div class="role-grid">
+                    <div class="role-pill" onclick="fill('admin_silver_stars')">Admin</div>
+                    <div class="role-pill" onclick="fill('principal_silver_stars')">Principal</div>
+                    <div class="role-pill" onclick="fill('teacher_silver_stars')">Teacher</div>
+                    <div class="role-pill" onclick="fill('student_silver_stars')">Student</div>
+                </div>
+            </div>
+
+            <!-- Gold -->
+            <div class="tier-group tier-gold">
+                <div class="tier-header">
+                    <span class="tier-name">Beacon Academy</span>
+                    <span class="tier-badge badge-gold">Gold<span class="price-tag"> {{ active_currency.symbol }}{{ active_currency.gold }}/yr</span></span>
+                </div>
+                <div class="role-grid">
+                    <div class="role-pill" onclick="fill('admin_gold_beacon')">Admin</div>
+                    <div class="role-pill" onclick="fill('principal_gold_beacon')">Principal</div>
+                    <div class="role-pill" onclick="fill('teacher_gold_beacon')">Teacher</div>
+                    <div class="role-pill" onclick="fill('accountant_gold_beacon')">Accountant</div>
+                </div>
+            </div>
+
+            <!-- Platinum -->
+            <div class="tier-group tier-platinum">
+                <div class="tier-header">
+                    <span class="tier-name">Imperial Elite College</span>
+                    <span class="tier-badge badge-platinum">Platinum<span class="price-tag"> {{ active_currency.symbol }}{{ active_currency.platinum }}/yr</span></span>
+                </div>
+                <div class="role-grid">
+                    <div class="role-pill" onclick="fill('admin_platinum_imperial')">Admin</div>
+                    <div class="role-pill" onclick="fill('principal_platinum_imperial')">Principal</div>
+                    <div class="role-pill" onclick="fill('teacher_platinum_imperial')">Teacher</div>
+                    <div class="role-pill" onclick="fill('accountant_platinum_imperial')">Accountant</div>
+                    <div class="role-pill" onclick="fill('student_platinum_imperial')">Student</div>
+                    <div class="role-pill" onclick="fill('parent_platinum_imperial')">Parent</div>
+                </div>
+            </div>
+
+            <div class="pw-hint">All demo accounts &bull; password: <code>school123</code></div>
+        </div>
+    </div>
+
+    <script>
+        function fill(u) {
+            document.getElementById('username').value = u;
+            document.getElementById('password').value = 'school123';
+            const btn = document.querySelector('.btn-login');
+            btn.style.transform = 'scale(1.03)';
+            setTimeout(function(){ btn.style.transform = ''; }, 250);
+        }
+
+        // Twinkling star field
+        (function() {
+            var container = document.getElementById('stars');
+            for (var i = 0; i < 70; i++) {
+                var s = document.createElement('div');
+                s.className = 'star';
+                var size = Math.random() * 2.5 + 0.5;
+                s.style.cssText = 'width:'+size+'px;height:'+size+'px;'
+                    +'left:'+(Math.random()*100)+'%;'
+                    +'top:'+(Math.random()*100)+'%;'
+                    +'animation-duration:'+(Math.random()*4+2)+'s;'
+                    +'animation-delay:'+(Math.random()*6)+'s;';
+                container.appendChild(s);
+            }
+        })();
+    </script>
+</body>
+</html>

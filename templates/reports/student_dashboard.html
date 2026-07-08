@@ -1,0 +1,182 @@
+{% extends 'base.html' %}
+
+{% block title %}Student Hub - School OS{% endblock %}
+
+{% block content %}
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 32px;">
+    <div>
+        <h1 style="font-size: 28px; font-weight: 800; letter-spacing: -0.5px;">Student Portal Hub</h1>
+        <p style="color: var(--text-muted); font-size: 14px;">Welcome back, <strong>{{ student.user.get_full_name|default:student.user.username }}</strong>! Grade: {{ class_room.name }}-{{ class_room.section }}</p>
+    </div>
+</div>
+
+<div class="grid-stats">
+    <div class="card-stat">
+        <div class="stat-info">
+            <p>Overall Attendance</p>
+            <h3>{{ attendance_rate }}%</h3>
+        </div>
+        <div class="stat-icon bg-cyan">
+            <i class="fa-solid fa-clipboard-user"></i>
+        </div>
+    </div>
+    <div class="card-stat">
+        <div class="stat-info">
+            <p>Class Room</p>
+            <h3>{{ class_room.name }}-{{ class_room.section }}</h3>
+        </div>
+        <div class="stat-icon bg-indigo">
+            <i class="fa-solid fa-graduation-cap"></i>
+        </div>
+    </div>
+    
+    <!-- Bus Info Stat -->
+    <div class="card-stat">
+        <div class="stat-info">
+            <p>My School Bus</p>
+            {% if bus_assignment %}
+                <h3>{{ bus_assignment.route.bus.bus_number }}</h3>
+            {% else %}
+                <h3>Not Assigned</h3>
+            {% endif %}
+        </div>
+        <div class="stat-icon bg-amber">
+            <i class="fa-solid fa-bus"></i>
+        </div>
+    </div>
+</div>
+
+<div style="display: grid; grid-template-columns: 2fr 1fr; gap: 24px;">
+    <!-- Left Column -->
+    <div>
+        <!-- Homework Assignments & Submission -->
+        <div class="card">
+            <div class="card-header">
+                <span class="card-title"><i class="fa-solid fa-book"></i> Pending Homework Assignments</span>
+            </div>
+            
+            <div style="display: flex; flex-direction: column; gap: 16px;">
+                {% for hw in homeworks %}
+                    <div style="background-color: var(--bg-primary); padding: 18px; border-radius: 10px; border: 1px solid var(--border);">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                            <strong style="font-size: 15px;">{{ hw.title }}</strong>
+                            <span style="font-size: 11px; font-weight: 600; color: var(--danger);">Due: {{ hw.due_date }}</span>
+                        </div>
+                        <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 6px;">Subject: {{ hw.subject.name }} | Assigned: {{ hw.date_assigned }}</p>
+                        <p style="font-size: 13px; line-height: 1.4; margin-bottom: 16px;">{{ hw.description }}</p>
+
+                        <!-- Submission Form inline -->
+                        <form action="{% url 'submit_homework' %}" method="post" enctype="multipart/form-data" style="background-color: var(--bg-secondary); border: 1px solid var(--border); padding: 14px; border-radius: 8px;">
+                            {% csrf_token %}
+                            <input type="hidden" name="homework_id" value="{{ hw.id }}">
+                            <div class="form-group" style="margin-bottom: 10px;">
+                                <label style="font-size: 11px; font-weight: 700; color: var(--text-muted);">Text Submission / Answers</label>
+                                <textarea name="text_response" rows="2" class="form-control" placeholder="Write answers or comments..." style="padding: 6px 10px; font-size: 12px;"></textarea>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <div style="font-size: 11px; color: var(--text-muted);">
+                                    <input type="file" name="file_submission" style="font-size: 11px;">
+                                </div>
+                                <button type="submit" class="btn btn-primary" style="padding: 6px 12px; font-size: 11px;">Submit Homework</button>
+                            </div>
+                        </form>
+                    </div>
+                {% empty %}
+                    <p style="text-align: center; color: var(--text-muted); padding: 20px 0;">No active homework assignments.</p>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Grade Report Card -->
+        <div class="card">
+            <div class="card-header">
+                <span class="card-title"><i class="fa-solid fa-star"></i> My Grade Registry & Marks</span>
+            </div>
+            
+            <table>
+                <thead>
+                    <tr>
+                        <th>Exam Name</th>
+                        <th>Subject</th>
+                        <th>Marks Obtained</th>
+                        <th>Max Marks</th>
+                        <th>Grade</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for mk in marks %}
+                        <tr>
+                            <td>{{ mk.exam_schedule.exam.name }}</td>
+                            <td>{{ mk.exam_schedule.subject.name }}</td>
+                            <td>{{ mk.marks_obtained }}</td>
+                            <td>{{ mk.exam_schedule.max_marks }}</td>
+                            <td>
+                                <span class="school-badge" style="background-color: var(--primary-light); color: var(--primary); font-size: 11px;">
+                                    {{ mk.grade }}
+                                </span>
+                            </td>
+                        </tr>
+                    {% empty %}
+                        <tr><td colspan="5" style="text-align: center; color: var(--text-muted);">No marks published yet.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Right Column -->
+    <div>
+        <!-- Timetable -->
+        <div class="card">
+            <div class="card-header">
+                <span class="card-title"><i class="fa-solid fa-clock"></i> Timetable Today</span>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 12px;">
+                {% for slot in timetable %}
+                    <div style="background-color: var(--bg-primary); padding: 12px; border-radius: 8px; border-left: 3px solid var(--primary);">
+                        <div style="display: flex; justify-content: space-between;">
+                            <strong style="font-size: 13px;">{{ slot.subject.name }}</strong>
+                            <span style="font-size: 11px; font-weight: 600; color: var(--primary);">{{ slot.start_time|time:"H:i" }} - {{ slot.end_time|time:"H:i" }}</span>
+                        </div>
+                        <p style="font-size: 11px; color: var(--text-muted); margin-top: 4px;">Faculty: {{ slot.teacher.user.get_full_name }}</p>
+                    </div>
+                {% empty %}
+                    <p style="text-align: center; color: var(--text-muted); font-size: 13px;">No classes today.</p>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Fee Invoice summary -->
+        <div class="card">
+            <div class="card-header">
+                <span class="card-title"><i class="fa-solid fa-dollar-sign"></i> Outstanding Invoices</span>
+            </div>
+            
+            <div style="display: flex; flex-direction: column; gap: 12px;">
+                {% for fee in fees %}
+                    <div style="background-color: var(--bg-primary); padding: 14px; border-radius: 8px; border: 1px solid var(--border);">
+                        <div style="display: flex; justify-content: space-between;">
+                            <strong>{{ fee.fee_structure.fee_type }}</strong>
+                            <span class="text-{% if fee.status == 'paid' %}success{% else %}danger{% endif %}" style="font-size: 11px; font-weight: 700; text-transform: uppercase;">{{ fee.status }}</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; font-size: 13px; margin-top: 10px; color: var(--text-muted);">
+                            <span>Total Due:</span>
+                            <span>${{ fee.net_amount }}</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; font-size: 13px; color: var(--text-muted);">
+                            <span>Paid amount:</span>
+                            <span>${{ fee.paid_amount }}</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; font-size: 13px; border-top: 1px dashed var(--border); padding-top: 6px; margin-top: 6px; font-weight: 700;">
+                            <span>Balance Due:</span>
+                            <span>${{ fee.balance }}</span>
+                        </div>
+                    </div>
+                {% empty %}
+                    <p style="text-align: center; color: var(--text-muted); font-size: 12px;">No fees billed.</p>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

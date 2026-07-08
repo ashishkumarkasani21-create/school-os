@@ -1,0 +1,1 @@
+# School OS static files directory placeholder.

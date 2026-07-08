@@ -1,0 +1,254 @@
+{% extends 'base.html' %}
+
+{% block title %}Teacher Portal - School OS{% endblock %}
+
+{% block content %}
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 32px;">
+    <div>
+        <h1 style="font-size: 28px; font-weight: 800; letter-spacing: -0.5px;">Teacher Dashboard</h1>
+        <p style="color: var(--text-muted); font-size: 14px;">Record daily attendance, upload assignments, and log midterm/final grades.</p>
+    </div>
+</div>
+
+<div style="display: grid; grid-template-columns: 2fr 1fr; gap: 24px;">
+    <!-- Left Column: Primary Actions -->
+    <div>
+        <div class="card">
+            <div style="margin-bottom: 16px; display: flex; gap: 8px; border-bottom: 1px solid var(--border); padding-bottom: 12px;">
+                <button class="btn btn-primary" onclick="showTeacherTab('attendance-panel')" id="btn-attendance-panel">Take Attendance</button>
+                <button class="btn btn-secondary" onclick="showTeacherTab('marks-panel')" id="btn-marks-panel">Enter Marks</button>
+                <button class="btn btn-secondary" onclick="showTeacherTab('homework-panel')" id="btn-homework-panel">Post Homework</button>
+            </div>
+
+            <!-- Panel 1: Take Attendance -->
+            <div id="attendance-panel" class="teacher-tab">
+                <h3 style="font-size: 16px; font-weight: 700; margin-bottom: 16px;">Daily Attendance Checklist</h3>
+                
+                <form action="{% url 'record_attendance' %}" method="post">
+                    {% csrf_token %}
+                    
+                    <div style="display: flex; gap: 16px; margin-bottom: 20px;">
+                        <div style="flex: 1;">
+                            <label for="attendance_date" style="font-size: 13px; font-weight: 600; margin-bottom: 6px; display: block;">Select Date</label>
+                            <input type="date" name="attendance_date" id="attendance_date" class="form-control" value="{{ today|date:'Y-m-d' }}" required>
+                        </div>
+                    </div>
+
+                    {% for class_room in classes %}
+                        <div style="margin-top: 20px;">
+                            <h4 style="margin-bottom: 10px; font-size: 14px; border-bottom: 1px solid var(--border); padding-bottom: 6px;">
+                                <i class="fa-solid fa-users"></i> Students in {{ class_room.name }} - {{ class_room.section }}
+                            </h4>
+                            
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Student</th>
+                                        <th>Status Selection</th>
+                                        <th>Remarks</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for stud in class_room.students.all %}
+                                        <tr>
+                                            <td>{{ stud.user.get_full_name|default:stud.user.username }}</td>
+                                            <td>
+                                                <div style="display: flex; gap: 12px;">
+                                                    <label><input type="radio" name="status_{{ stud.id }}" value="present" checked> P</label>
+                                                    <label><input type="radio" name="status_{{ stud.id }}" value="absent"> A</label>
+                                                    <label><input type="radio" name="status_{{ stud.id }}" value="late"> L</label>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <input type="text" name="remarks_{{ stud.id }}" class="form-control" style="padding: 4px 8px; font-size: 12px;" placeholder="Optional">
+                                            </td>
+                                        </tr>
+                                    {% empty %}
+                                        <tr><td colspan="3" style="text-align: center; color: var(--text-muted);">No student enrolled in this class.</td></tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% endfor %}
+                    
+                    <button type="submit" class="btn btn-primary" style="margin-top: 20px; width: 100%;">Save Attendance Record</button>
+                </form>
+            </div>
+
+            <!-- Panel 2: Enter Marks -->
+            <div id="marks-panel" class="teacher-tab" style="display: none;">
+                <h3 style="font-size: 16px; font-weight: 700; margin-bottom: 16px;">Record Exam Performance</h3>
+                
+                <form action="{% url 'record_marks' %}" method="post">
+                    {% csrf_token %}
+                    
+                    <div class="form-group">
+                        <label for="exam_schedule_id">Select Exam Schedule Block</label>
+                        <select name="exam_schedule_id" id="exam_schedule_id" class="form-control" required>
+                            <option value="">-- Choose Exam Block --</option>
+                            {% for cs in class_subjects %}
+                                {% for cls in classes %}
+                                    {% if cs.class_room == cls %}
+                                        {% for sched in cs.subject.examschedule_set.all %}
+                                            {% if sched.class_room == cls %}
+                                                <option value="{{ sched.id }}">
+                                                    {{ sched.exam.name }} - {{ cls.name }} - {{ cs.subject.name }} (Max Marks: {{ sched.max_marks }})
+                                                </option>
+                                            {% endif %}
+                                        {% endfor %}
+                                    {% endif %}
+                                {% endfor %}
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    {% for cls in classes %}
+                        <div style="margin-top: 20px;">
+                            <h4 style="margin-bottom: 10px; font-size: 14px; border-bottom: 1px solid var(--border); padding-bottom: 6px;">
+                                Grades List: {{ cls.name }} - {{ cls.section }}
+                            </h4>
+                            
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Student</th>
+                                        <th>Marks Obtained</th>
+                                        <th>Comments</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for stud in cls.students.all %}
+                                        <tr>
+                                            <td>{{ stud.user.get_full_name|default:stud.user.username }}</td>
+                                            <td>
+                                                <input type="number" step="0.1" name="marks_{{ stud.id }}" class="form-control" style="padding: 4px 8px; width: 100px; font-size: 13px;" placeholder="Marks">
+                                            </td>
+                                            <td>
+                                                <input type="text" name="remarks_{{ stud.id }}" class="form-control" style="padding: 4px 8px; font-size: 12px;" placeholder="Remarks">
+                                            </td>
+                                        </tr>
+                                    {% empty %}
+                                        <tr><td colspan="3" style="text-align: center; color: var(--text-muted);">No student enrolled.</td></tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% endfor %}
+                    
+                    <button type="submit" class="btn btn-primary" style="margin-top: 20px; width: 100%;">Upload Student Marks</button>
+                </form>
+            </div>
+
+            <!-- Panel 3: Post Homework -->
+            <div id="homework-panel" class="teacher-tab" style="display: none;">
+                <h3 style="font-size: 16px; font-weight: 700; margin-bottom: 16px;">Post Homework / Assignment</h3>
+                
+                <form action="{% url 'create_homework' %}" method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    
+                    <div class="form-group">
+                        <label for="class_room_id">Target Class</label>
+                        <select name="class_room_id" id="class_room_id" class="form-control" required>
+                            {% for cls in classes %}
+                                <option value="{{ cls.id }}">{{ cls.name }} - {{ cls.section }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="subject_id">Subject</label>
+                        <select name="subject_id" id="subject_id" class="form-control" required>
+                            {% for cs in class_subjects %}
+                                <option value="{{ cs.subject.id }}">{{ cs.subject.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="title">Title / Topic</label>
+                        <input type="text" name="title" id="title" class="form-control" required placeholder="e.g. Linear Algebra Worksheet">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="description">Instructions / Questions</label>
+                        <textarea name="description" id="description" class="form-control" rows="4" required placeholder="Write details here..."></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="due_date">Due Date</label>
+                        <input type="date" name="due_date" id="due_date" class="form-control" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="attachment">Attachment File (PDF, Worksheets)</label>
+                        <input type="file" name="attachment" id="attachment" class="form-control" accept=".pdf,.doc,.docx,.png,.jpg">
+                    </div>
+
+                    <button type="submit" class="btn btn-primary" style="width: 100%;">Create & Publish Assignment</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Right Column: Info displays -->
+    <div>
+        <!-- My Schedule -->
+        <div class="card">
+            <div class="card-header">
+                <span class="card-title"><i class="fa-solid fa-calendar-days"></i> Faculty Schedule</span>
+            </div>
+            
+            <div style="display: flex; flex-direction: column; gap: 12px;">
+                {% for slot in timetable %}
+                    <div style="background-color: var(--bg-primary); padding: 12px; border-radius: 8px; border-left: 3px solid var(--primary);">
+                        <div style="display: flex; justify-content: space-between;">
+                            <strong style="font-size: 13px;">{{ slot.subject.name }}</strong>
+                            <span style="font-size: 11px; font-weight: 600; color: var(--primary);">{{ slot.start_time|time:"H:i" }} - {{ slot.end_time|time:"H:i" }}</span>
+                        </div>
+                        <p style="font-size: 12px; color: var(--text-muted); margin-top: 4px;">Class: {{ slot.class_room.name }} ({{ slot.class_room.section }})</p>
+                    </div>
+                {% empty %}
+                    <p style="text-align: center; color: var(--text-muted); font-size: 13px;">No classes scheduled.</p>
+                {% endfor %}
+            </div>
+        </div>
+        
+        <!-- Leave request form -->
+        <div class="card">
+            <div class="card-header">
+                <span class="card-title"><i class="fa-solid fa-umbrella-beach"></i> Apply for Leave</span>
+            </div>
+            
+            <form action="{% url 'request_leave' %}" method="post">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label for="start_date">Start Date</label>
+                    <input type="date" name="start_date" id="start_date" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label for="end_date">End Date</label>
+                    <input type="date" name="end_date" id="end_date" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label for="reason">Reason for Absence</label>
+                    <textarea name="reason" id="reason" class="form-control" rows="2" placeholder="Describe leave cause..." required></textarea>
+                </div>
+                <button type="submit" class="btn btn-secondary" style="width: 100%;">Submit Leave Application</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    function showTeacherTab(tabId) {
+        document.querySelectorAll('.teacher-tab').forEach(tab => tab.style.display = 'none');
+        document.getElementById(tabId).style.display = 'block';
+
+        // Toggle buttons active state
+        document.querySelectorAll('[id^="btn-"]').forEach(btn => {
+            btn.className = 'btn btn-secondary';
+        });
+        document.getElementById('btn-' + tabId).className = 'btn btn-primary';
+    }
+</script>
+{% endblock %}
