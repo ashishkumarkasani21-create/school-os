@@ -108,6 +108,7 @@
                             <th>Designation</th>
                             <th>Username</th>
                             <th>Password</th>
+                            <th>Email</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -118,9 +119,10 @@
                                 <td>{{ tch.designation }}</td>
                                 <td><code>{{ tch.user.username }}</code></td>
                                 <td><code>school123</code></td>
+                                <td>{{ tch.user.email }}</td>
                             </tr>
                         {% empty %}
-                            <tr><td colspan="5" style="text-align: center; color: var(--text-muted);">No teachers found.</td></tr>
+                            <tr><td colspan="6" style="text-align: center; color: var(--text-muted);">No teachers found.</td></tr>
                         {% endfor %}
                     </tbody>
                 </table>
