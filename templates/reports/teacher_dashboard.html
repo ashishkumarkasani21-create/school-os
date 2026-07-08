@@ -3,17 +3,17 @@
 {% block title %}Teacher Portal - School OS{% endblock %}
 
 {% block content %}
-<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 32px; flex-wrap: wrap; gap: 16px;">
+<div style="margin-bottom: 32px; display: flex; flex-direction: column; gap: 16px;">
     <div>
         <h1 style="font-size: 28px; font-weight: 800; letter-spacing: -0.5px;">Teacher Dashboard</h1>
-        <p style="color: var(--text-muted); font-size: 14px;">Record daily attendance, upload assignments, and log midterm/final grades.</p>
+        <p style="color: var(--text-muted); font-size: 14px; margin-bottom: 4px;">Record daily attendance, upload assignments, and log midterm/final grades.</p>
     </div>
     
     <!-- Quick Switch Teacher Dropdown -->
-    <div style="display: flex; align-items: center; gap: 10px; background: white; border: 1px solid var(--border); padding: 8px 16px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.03);">
+    <div style="display: inline-flex; align-items: center; gap: 10px; background: white; border: 1px solid var(--border); padding: 8px 16px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.03); width: fit-content;">
         <i class="fa-solid fa-user-tie" style="color: var(--primary); font-size: 16px;"></i>
         <div style="text-align: left;">
-            <label style="font-size: 10px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; display: block; margin-bottom: 2px;">Active Teacher</label>
+            <label style="font-size: 10px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; display: block; margin-bottom: 2px;">Active Teacher Context</label>
             <form action="{% url 'login' %}" method="post" id="switch-teacher-header-form" style="margin: 0;">
                 {% csrf_token %}
                 <input type="hidden" name="password" value="school123">
