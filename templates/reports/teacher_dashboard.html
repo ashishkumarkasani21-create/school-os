@@ -46,17 +46,27 @@
                 <form action="{% url 'record_attendance' %}" method="post">
                     {% csrf_token %}
                     
-                    <div style="display: flex; gap: 16px; margin-bottom: 20px;">
-                        <div style="flex: 1;">
+                    <div style="display: flex; gap: 16px; margin-bottom: 20px; flex-wrap: wrap;">
+                        <div style="flex: 1; min-width: 150px;">
                             <label for="attendance_date" style="font-size: 13px; font-weight: 600; margin-bottom: 6px; display: block;">Select Date</label>
                             <input type="date" name="attendance_date" id="attendance_date" class="form-control" value="{{ today|date:'Y-m-d' }}" required>
                         </div>
-                        <div style="flex: 1;">
+                        <div style="flex: 1; min-width: 180px;">
                             <label for="attendance_subject_id" style="font-size: 13px; font-weight: 600; margin-bottom: 6px; display: block;">Select Subject</label>
                             <select name="subject_id" id="attendance_subject_id" class="form-control" required>
                                 <option value="">-- Choose Subject --</option>
                                 {% for cs in class_subjects %}
                                     <option value="{{ cs.subject.id }}">{{ cs.subject.name }} ({{ cs.class_room.name }} - {{ cs.class_room.section }})</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div style="flex: 1; min-width: 180px;">
+                            <label for="attendance_teacher_id" style="font-size: 13px; font-weight: 600; margin-bottom: 6px; display: block;">Select Teacher</label>
+                            <select name="teacher_id" id="attendance_teacher_id" class="form-control" required>
+                                {% for t in all_teachers %}
+                                    <option value="{{ t.id }}" {% if t.user == request.user %}selected{% endif %}>
+                                        {{ t.user.get_full_name }}
+                                    </option>
                                 {% endfor %}
                             </select>
                         </div>
