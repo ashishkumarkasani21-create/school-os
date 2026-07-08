@@ -87,17 +87,45 @@ def setup_student_academics_and_fees(student_prof):
         defaults={'status': 'present'}
     )
 
-    # Homework Setup for all subjects in this classroom
-    cls_subs = ClassSubject.objects.filter(class_room=classroom)
-    homework_titles = {
-        'Mathematics': ('Quadratic Equations Practice', 'Solve questions 1 to 10 from Chapter 4 of the algebra textbook.'),
-        'English Literature': ('Shakespeare\'s Macbeth Review', 'Write a 500-word analysis on the themes of ambition and guilt in Act 3.'),
-        'Science': ('Photosynthesis Lab Report', 'Summarize the light-dependent and light-independent reactions of photosynthesis.'),
-        'Physics': ('Newtonian Mechanics Exercises', 'Complete the force vector diagrams and resolve mass calculations for page 8.'),
-        'Chemistry': ('Periodic Table Trends Study', 'Review atomic radius, ionization energy, and electronegativity trends.'),
-        'Computer Science': ('Python Control Flow Coding', 'Write a program to calculate prime numbers up to 100 using nested loops.'),
-    }
+    # Homework Setup for all subjects in this classroom based on Grade level
+    import re
+    grade_match = re.search(r'\d+', classroom.name)
+    grade_num = int(grade_match.group()) if grade_match else 10
+
+    if grade_num <= 6:
+        homework_titles = {
+            'Mathematics': ('Fractions & Decimals Practice', 'Solve questions 1 to 10 on page 12 of your math workbook.'),
+            'English Literature': ('Parts of Speech Assignment', 'Identify and write 5 examples of nouns, verbs, and adjectives from Chapter 1.'),
+            'Science': ('The Water Cycle Diagram', 'Draw and label the water cycle (Evaporation, Condensation, Precipitation) on an A4 sheet.'),
+            'Social Studies': ('Ancient Egypt Civilization Map', 'Color the Nile river valley and locate Cairo and Giza on the template map.'),
+            'Computer Science': ('Scratch Coding Basics', 'Design a simple Scratch project where a sprite moves in a square path.'),
+        }
+    elif grade_num <= 8:
+        homework_titles = {
+            'Mathematics': ('Introduction to Linear Equations', 'Solve the 8 algebraic equations listed on page 24 (finding x).'),
+            'English Literature': ('Short Story Moral Analysis', 'Read the short story "The Honest Woodcutter" and write a paragraph on its moral.'),
+            'Science': ('Plant vs Animal Cell Comparison', 'Sketch both cell types and label the nucleus, cell wall, and mitochondria.'),
+            'Social Studies': ('Industrial Revolution Timeline', 'List 5 key inventions of the Industrial Revolution and their dates.'),
+            'Computer Science': ('HTML Basic Webpage Creation', 'Create a simple HTML page displaying your favorite hobby with a header and paragraph.'),
+        }
+    elif grade_num <= 10:
+        homework_titles = {
+            'Mathematics': ('Quadratic Equations Practice', 'Solve questions 1 to 10 from Chapter 4 of the algebra textbook.'),
+            'English Literature': ('Shakespeare\'s Macbeth Review', 'Write a 500-word analysis on the themes of ambition and guilt in Act 3.'),
+            'Science': ('Photosynthesis Lab Report', 'Summarize the light-dependent and light-independent reactions of photosynthesis.'),
+            'Social Studies': ('World War I Causes Summary', 'Write a brief overview of the MAIN causes of WWI (Militarism, Alliances, Imperialism, Nationalism).'),
+            'Computer Science': ('Python Control Flow Loops', 'Write a program to calculate prime numbers up to 100 using nested loops.'),
+        }
+    else: # Grade 11 & 12
+        homework_titles = {
+            'Mathematics': ('Calculus: Limits & Continuity', 'Complete exercise 3.2 on limits evaluating functions approaching infinity.'),
+            'English Literature': ('Hamlet Characterization Essay', 'Write a critical essay evaluating Hamlet\'s tragic flaw of procrastination.'),
+            'Science': ('Chemical Bonding & Valency', 'Draw Lewis structures and explain the covalent bonding in CO2 and H2O molecules.'),
+            'Social Studies': ('Modern Geo-Politics Trends', 'Draft a 2-page report on the impact of globalization on local economies.'),
+            'Computer Science': ('Object-Oriented Programming in Python', 'Implement a simple class structure representing a Library System with inheritance.'),
+        }
     
+    cls_subs = ClassSubject.objects.filter(class_room=classroom)
     for cs in cls_subs:
         sub_name = cs.subject.name
         title, desc = homework_titles.get(sub_name, (f'{sub_name} Chapter Exercise', f'Read Chapter 2 and complete the questions at the end of the section.'))
