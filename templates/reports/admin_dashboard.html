@@ -79,6 +79,8 @@
                             <th>Name</th>
                             <th>Class/Section</th>
                             <th>Roll No</th>
+                            <th>Username</th>
+                            <th>Password</th>
                             <th>Status</th>
                         </tr>
                     </thead>
@@ -89,10 +91,12 @@
                                 <td>{{ stu.user.get_full_name|default:stu.user.username }}</td>
                                 <td>{{ stu.class_room|default:"Unassigned" }}</td>
                                 <td>{{ stu.roll_number|default:"-" }}</td>
+                                <td><code>{{ stu.user.username }}</code></td>
+                                <td><code>school123</code></td>
                                 <td><span class="text-success"><i class="fa-solid fa-circle-check"></i> Active</span></td>
                             </tr>
                         {% empty %}
-                            <tr><td colspan="5" style="text-align: center; color: var(--text-muted);">No student profiles found. Use OCR Admission Form to upload a student scan!</td></tr>
+                            <tr><td colspan="7" style="text-align: center; color: var(--text-muted);">No student profiles found. Use OCR Admission Form to upload a student scan!</td></tr>
                         {% endfor %}
                     </tbody>
                 </table>
@@ -135,6 +139,8 @@
                         <tr>
                             <th>Employee ID</th>
                             <th>Name</th>
+                            <th>Username</th>
+                            <th>Password</th>
                             <th>Access Level</th>
                         </tr>
                     </thead>
@@ -143,10 +149,12 @@
                             <tr>
                                 <td><code>{{ acc.employee_id }}</code></td>
                                 <td>{{ acc.user.get_full_name|default:acc.user.username }}</td>
+                                <td><code>{{ acc.user.username }}</code></td>
+                                <td><code>school123</code></td>
                                 <td>Finance Lead</td>
                             </tr>
                         {% empty %}
-                            <tr><td colspan="3" style="text-align: center; color: var(--text-muted);">No accountants found.</td></tr>
+                            <tr><td colspan="5" style="text-align: center; color: var(--text-muted);">No accountants found.</td></tr>
                         {% endfor %}
                     </tbody>
                 </table>
