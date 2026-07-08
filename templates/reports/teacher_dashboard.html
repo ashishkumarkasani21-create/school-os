@@ -20,7 +20,7 @@
                 <select name="username" class="form-control" style="font-size: 13px; font-weight: 700; color: var(--text); border: none; padding: 0 20px 0 0; background: transparent; cursor: pointer; outline: none; box-shadow: none; height: auto;" onchange="this.form.submit()">
                     {% for t in all_teachers %}
                         <option value="{{ t.user.username }}" {% if t.user == request.user %}selected{% endif %}>
-                            {{ t.user.get_full_name }} ({% for c in t.classroom_set.all %}{{ c.name }}-{{ c.section }}{% empty %}No Class{% endfor %})
+                            {{ t.user.get_full_name }} ({% for c in t.assigned_classes.all %}{{ c.name }}-{{ c.section }}{% empty %}No Class{% endfor %})
                         </option>
                     {% endfor %}
                 </select>
@@ -271,9 +271,9 @@
                             <div>
                                 <strong style="font-size: 13px; display: block; color: var(--text);">{{ t.user.get_full_name }}</strong>
                                 <span style="font-size: 11px; color: var(--text-muted); display: block;">Username: <code>{{ t.user.username }}</code></span>
-                                {% if t.classroom_set.all %}
+                                {% if t.assigned_classes.all %}
                                     <span style="font-size: 10px; background: rgba(99, 102, 241, 0.08); color: var(--primary); padding: 2px 6px; border-radius: 4px; font-weight: 600; display: inline-block; margin-top: 4px;">
-                                        Class: {% for c in t.classroom_set.all %}{{ c.name }}-{{ c.section }}{% endfor %}
+                                        Class: {% for c in t.assigned_classes.all %}{{ c.name }}-{{ c.section }}{% endfor %}
                                     </span>
                                 {% endif %}
                             </div>
