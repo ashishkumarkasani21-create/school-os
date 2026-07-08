@@ -109,7 +109,12 @@
                         </div>
                     {% endfor %}
                     
-                    <button type="submit" class="btn btn-primary" style="margin-top: 20px; width: 100%;">Save Attendance Record</button>
+                    <div style="display: flex; gap: 12px; align-items: center; margin-top: 20px; flex-wrap: wrap;">
+                        <button type="submit" class="btn btn-primary" style="flex: 2; min-width: 200px;">Save Attendance Record</button>
+                        <a href="{% url 'download_attendance_csv' %}" class="btn btn-secondary" style="display: inline-flex; align-items: center; gap: 8px; text-decoration: none; justify-content: center; height: 42px; flex: 1; min-width: 250px;">
+                            <i class="fa-solid fa-download"></i> Download Attendance Report (CSV)
+                        </a>
+                    </div>
                 </form>
             </div>
 

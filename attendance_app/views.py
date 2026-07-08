@@ -45,3 +45,29 @@ def record_attendance(request):
         messages.success(request, f"Attendance successfully saved for {logged_count} students on {attendance_date}.")
         
     return redirect('dashboard_redirect')
+
+import csv
+from django.http import HttpResponse
+
+@login_required
+def download_attendance_csv(request):
+    if request.user.role not in ['teacher', 'admin']:
+        return HttpResponse("Unauthorized", status=403)
+        
+    response = HttpResponse(content_type='text/csv')
+    response['Content-Disposition'] = 'attachment; filename="attendance_report.csv"'
+    
+    writer = csv.writer(response)
+    writer.writerow(['Student Name', 'Date', 'Subject', 'Status', 'Remarks'])
+    
+    attendances = Attendance.objects.filter(student__school=request.user.school).select_related('student__user', 'subject')
+    for att in attendances:
+        writer.writerow([
+            att.student.user.get_full_name() or att.student.user.username,
+            att.date.strftime('%Y-%m-%d'),
+            att.subject.name if att.subject else 'General',
+            att.get_status_display(),
+            att.remarks or ''
+        ])
+        
+    return response

@@ -13,7 +13,7 @@ from reports.views import (
 from finance.views import record_payment, assign_concession
 from ocr_app.views import upload_ocr, review_ocr, approve_ocr
 from transport.views import bus_tracking_map, get_bus_live_coords
-from attendance_app.views import record_attendance
+from attendance_app.views import record_attendance, download_attendance_csv
 from marks_app.views import record_marks
 from homework_app.views import create_homework, submit_homework
 from leave_app.views import request_leave, approve_leave
@@ -49,6 +49,7 @@ urlpatterns = [
     
     # Core Actions urls
     path('academics/attendance/', record_attendance, name='record_attendance'),
+    path('academics/attendance/download/', download_attendance_csv, name='download_attendance_csv'),
     path('academics/marks/', record_marks, name='record_marks'),
     path('academics/homework/create/', create_homework, name='create_homework'),
     path('academics/homework/submit/', submit_homework, name='submit_homework'),

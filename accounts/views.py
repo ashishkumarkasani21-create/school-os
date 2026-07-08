@@ -5,15 +5,6 @@ from django.contrib import messages
 from django.contrib.auth.forms import AuthenticationForm
 
 def login_view(request):
-    if request.user.is_authenticated:
-        return redirect('dashboard_redirect')
-        
-    # Check if a country change was requested via GET — redirect so CSRF token refreshes
-    country = request.GET.get('country')
-    if country:
-        request.session['selected_country'] = country
-        return redirect('login')
-
     if request.method == 'POST' and 'username' in request.POST:
         form = AuthenticationForm(request, data=request.POST)
         if form.is_valid():
@@ -27,8 +18,17 @@ def login_view(request):
                 messages.error(request, "Invalid username or password.")
         else:
             messages.error(request, "Invalid username or password.")
-    else:
-        form = AuthenticationForm()
+
+    elif request.user.is_authenticated:
+        return redirect('dashboard_redirect')
+        
+    # Check if a country change was requested via GET — redirect so CSRF token refreshes
+    country = request.GET.get('country')
+    if country:
+        request.session['selected_country'] = country
+        return redirect('login')
+
+    form = AuthenticationForm()
 
     selected_country = request.session.get('selected_country', 'IN')
     country_currencies = {
