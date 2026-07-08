@@ -435,5 +435,148 @@ class Command(BaseCommand):
                     defaults={'teacher': profile}
                 )
 
+        # 5. Seed extra bus routes, buses, and drivers for all schools
+        self.stdout.write("Seeding extra bus routes, buses, and drivers...")
+        for code, school in schools.items():
+            if not school:
+                continue
+            for color, suffix, lat_offset, lng_offset in [('North Hill', 'Y', 0.012, 0.008), ('West Coast', 'Z', -0.015, -0.012)]:
+                bus_obj, _ = Bus.objects.get_or_create(
+                    school=school,
+                    bus_number=f'BUS-{school.id:02d}{suffix}',
+                    defaults={'capacity': 30, 'status': 'active'}
+                )
+                driver_obj, _ = Driver.objects.get_or_create(
+                    school=school,
+                    name=f'{color} Driver',
+                    defaults={'phone': f'+1 555-01{school.id:02d}{suffix}', 'license_number': f'LIC-{school.id}-{suffix}99'}
+                )
+                route_obj, _ = Route.objects.get_or_create(
+                    school=school,
+                    name=f'{color} Route',
+                    defaults={'bus': bus_obj, 'driver': driver_obj}
+                )
+                # Seed stop coordinates near default (Delhi coords around 28.61, 77.20)
+                stops_list = [
+                    (f'{color} Stop 1', 28.6139 + lat_offset, 77.2090 + lng_offset, datetime.time(7, 30), 1),
+                    (f'{color} Stop 2', 28.6150 + lat_offset * 1.5, 77.2150 + lng_offset * 1.5, datetime.time(7, 50), 2),
+                    (f'{color} Campus Stop', 28.6200, 77.2300, datetime.time(8, 15), 3),
+                ]
+                for name, lat, lng, arr_time, seq in stops_list:
+                    Stop.objects.get_or_create(
+                        route=route_obj,
+                        name=name,
+                        defaults={'latitude': lat, 'longitude': lng, 'arrival_time': arr_time, 'sequence_order': seq}
+                    )
+
+        # 6. Seed custom students
+        self.stdout.write("Seeding custom students...")
+        custom_students = [
+            # Silver school
+            ('James', 'Smith', 'student_james', silver_school, 'Grade 6', 'A'),
+            ('Mary', 'Johnson', 'student_mary', silver_school, 'Grade 7', 'A'),
+            ('Patricia', 'Williams', 'student_patricia', silver_school, 'Grade 8', 'B'),
+            # Gold school
+            ('Robert', 'Jones', 'student_robert', gold_school, 'Grade 7', 'B'),
+            ('Michael', 'Brown', 'student_michael', gold_school, 'Grade 8', 'A'),
+            ('Elizabeth', 'Davis', 'student_elizabeth', gold_school, 'Grade 9', 'B'),
+            # Platinum school
+            ('William', 'Miller', 'student_william', plat_school, 'Grade 9', 'A'),
+            ('David', 'Wilson', 'student_david', plat_school, 'Grade 10', 'B'),
+            ('Richard', 'Moore', 'student_richard', plat_school, 'Grade 11', 'A'),
+            ('Joseph', 'Taylor', 'student_joseph', plat_school, 'Grade 12', 'A'),
+        ]
+
+        for first, last, username, school, class_name, section in custom_students:
+            if not school:
+                continue
+            # Create student user
+            user, created = User.objects.get_or_create(
+                username=username,
+                defaults={
+                    'first_name': first,
+                    'last_name': last,
+                    'email': f'{username}@schoolos.edu',
+                    'role': 'student',
+                    'school': school,
+                }
+            )
+            if created or not user.has_usable_password():
+                user.set_password('school123')
+                user.save()
+
+            # Create classroom if not exists
+            classroom, _ = ClassRoom.objects.get_or_create(
+                school=school,
+                name=class_name,
+                section=section,
+            )
+
+            # Get or create parent profile as placeholder
+            parent_user, _ = User.objects.get_or_create(
+                username=f"parent_{username}",
+                defaults={
+                    'first_name': f"Parent",
+                    'last_name': last,
+                    'email': f'parent_{username}@schoolos.edu',
+                    'role': 'parent',
+                    'school': school,
+                }
+            )
+            if parent_user.username == f"parent_{username}" and (created or not parent_user.has_usable_password()):
+                parent_user.set_password('school123')
+                parent_user.save()
+
+            parent_prof, _ = ParentProfile.objects.get_or_create(
+                user=parent_user,
+                defaults={'school': school, 'occupation': 'Education Professional', 'address': '123 School Lane'}
+            )
+
+            # Create Student Profile
+            StudentProfile.objects.get_or_create(
+                user=user,
+                defaults={
+                    'school': school,
+                    'student_id': f"STU-{school.id:02d}-{user.id}",
+                    'class_room': classroom,
+                    'roll_number': '15',
+                    'date_of_birth': datetime.date(2011, 4, 20),
+                    'parent': parent_prof
+                }
+            )
+
+        # 7. Seed custom accountants
+        self.stdout.write("Seeding custom accountants...")
+        custom_accountants = [
+            # Silver school
+            ('Charles', 'Harris', 'accountant_charles', silver_school),
+            # Gold school
+            ('Thomas', 'Martin', 'accountant_thomas', gold_school),
+            # Platinum school
+            ('Daniel', 'Jackson', 'accountant_daniel', plat_school),
+        ]
+
+        for first, last, username, school in custom_accountants:
+            if not school:
+                continue
+            user, created = User.objects.get_or_create(
+                username=username,
+                defaults={
+                    'first_name': first,
+                    'last_name': last,
+                    'email': f'{username}@schoolos.edu',
+                    'role': 'accountant',
+                    'school': school,
+                }
+            )
+            if created or not user.has_usable_password():
+                user.set_password('school123')
+                user.save()
+
+            AccountantProfile.objects.get_or_create(
+                user=user,
+                defaults={'school': school, 'employee_id': f"ACC-{school.id:02d}-{user.id}"}
+            )
+
         self.stdout.write(self.style.SUCCESS('Successfully seeded database with all roles, classes, fee tables, bus routes, and custom teachers!'))
 
