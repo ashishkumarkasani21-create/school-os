@@ -228,6 +228,29 @@
         .plan-features li:last-child { margin-bottom:0; }
         .plan-features li i { font-size:10px; color:var(--primary); }
 
+        /* ── Demo account pills ── */
+        .tier-group { margin-bottom:14px; border-radius:12px; border:1px solid var(--border); overflow:hidden; transition:border-color .2s; }
+        .tier-group:hover { border-color:rgba(0,0,0,0.12); }
+        .tier-header { display:flex; align-items:center; justify-content:space-between; padding:10px 14px; font-size:12px; font-weight:700; }
+        .tier-name { color:var(--text); }
+        .tier-badge { font-size:9px; padding:3px 9px; border-radius:20px; font-weight:800; text-transform:uppercase; }
+        .tier-silver .tier-header { background:rgba(100,116,139,0.06); }
+        .tier-gold .tier-header { background:rgba(245,158,11,0.06); }
+        .tier-platinum .tier-header { background:rgba(6,182,212,0.06); }
+        .role-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:6px; padding:10px 14px 12px; background:rgba(0,0,0,0.02); }
+        .role-pill {
+            background:#ffffff; border:1px solid var(--border);
+            padding:7px 4px; border-radius:8px; font-size:10px; cursor:pointer;
+            text-align:center; color:var(--text-muted); font-weight:600; transition:all .18s;
+        }
+        .role-pill:hover { background:rgba(99,102,241,0.08); border-color:rgba(99,102,241,0.35); color:var(--primary); transform:translateY(-1px); box-shadow:0 2px 8px rgba(99,102,241,0.12); }
+        .role-pill:active { transform:translateY(0); }
+        .pw-hint {
+            text-align:center; font-size:10px; color:var(--text-muted); margin-top:10px;
+            padding:8px 12px; background:rgba(0,0,0,0.02); border:1px solid var(--border); border-radius:8px;
+        }
+        .pw-hint code { font-family:monospace; color:var(--primary); font-weight:700; }
+
         @media(max-width:768px){
             .login-wrapper{flex-direction:column;max-width:480px}
             .plans-side{width:100%;max-height:none;border-left:none;border-top:1px solid var(--border)}
@@ -370,33 +393,81 @@
                 </ul>
             </div>
 
-            <!-- Demo Credentials -->
-            <div style="margin-top: 8px; border-top: 1px solid var(--border); padding-top: 16px;">
-                <div style="font-size: 13px; font-weight: 800; margin-bottom: 8px; color: var(--primary); display: flex; align-items: center; gap: 8px;">
-                    <i class="fa-solid fa-key" style="color: var(--accent);"></i> Demo Accounts Directory
+            </div>
+
+            <!-- Demo Account Quick Login -->
+            <div style="margin-top:8px; border-top:1px solid var(--border); padding-top:16px;">
+                <div class="plans-hdr" style="margin-bottom:14px;">
+                    <i class="fa-solid fa-wand-magic-sparkles"></i> Quick Login
                 </div>
-                <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 10px; line-height: 1.4;">
-                    Login with these default profiles to view the system. Password for all accounts: <code style="background: rgba(99,102,241,0.06); color: var(--primary); padding: 2px 6px; border-radius: 4px; font-weight: 700; font-family: monospace;">school123</code>
-                </div>
-                <div style="display: flex; flex-direction: column; gap: 8px; background: rgba(0,0,0,0.015); border: 1px solid var(--border); border-radius: 12px; padding: 12px;">
-                    <div>
-                        <div style="font-size: 10px; font-weight: 800; text-transform: uppercase; color: #475569; margin-bottom: 4px;">🥈 Silver Stars (Primary)</div>
-                        <div style="font-size: 10.5px; font-family: monospace; color: var(--text); line-height: 1.4;">admin_silver_stars<br>principal_silver_stars<br>teacher_silver_stars<br>student_silver_stars</div>
+
+                <!-- Silver -->
+                <div class="tier-group tier-silver">
+                    <div class="tier-header">
+                        <span class="tier-name">🥈 Silver Plan</span>
+                        <span class="tier-badge badge-silver">Core</span>
                     </div>
-                    <div style="border-top: 1px dashed var(--border); padding-top: 6px;">
-                        <div style="font-size: 10px; font-weight: 800; text-transform: uppercase; color: #b45309; margin-bottom: 4px;">🥇 Gold Beacon (Academy)</div>
-                        <div style="font-size: 10.5px; font-family: monospace; color: var(--text); line-height: 1.4;">admin_gold_beacon<br>principal_gold_beacon<br>teacher_gold_beacon<br>accountant_gold_beacon</div>
-                    </div>
-                    <div style="border-top: 1px dashed var(--border); padding-top: 6px;">
-                        <div style="font-size: 10px; font-weight: 800; text-transform: uppercase; color: #0e7490; margin-bottom: 4px;">💎 Platinum Imperial (College)</div>
-                        <div style="font-size: 10.5px; font-family: monospace; color: var(--text); line-height: 1.4;">admin_platinum_imperial<br>principal_platinum_imperial<br>teacher_platinum_imperial<br>parent_platinum_imperial<br>student_platinum_imperial</div>
+                    <div class="role-grid">
+                        <div class="role-pill" onclick="fill('admin_silver_stars')">Admin</div>
+                        <div class="role-pill" onclick="fill('principal_silver_stars')">Principal</div>
+                        <div class="role-pill" onclick="fill('teacher_silver_stars')">Teacher</div>
+                        <div class="role-pill" onclick="fill('student_silver_stars')">Student</div>
+                        <div class="role-pill" onclick="fill('teacher_john')">John</div>
                     </div>
                 </div>
+
+                <!-- Gold -->
+                <div class="tier-group tier-gold">
+                    <div class="tier-header">
+                        <span class="tier-name">🥇 Gold Plan</span>
+                        <span class="tier-badge badge-gold">Standard</span>
+                    </div>
+                    <div class="role-grid">
+                        <div class="role-pill" onclick="fill('admin_gold_beacon')">Admin</div>
+                        <div class="role-pill" onclick="fill('principal_gold_beacon')">Principal</div>
+                        <div class="role-pill" onclick="fill('teacher_gold_beacon')">Teacher</div>
+                        <div class="role-pill" onclick="fill('accountant_gold_beacon')">Accountant</div>
+                        <div class="role-pill" onclick="fill('teacher_ashish')">Ashish</div>
+                        <div class="role-pill" onclick="fill('teacher_swapna')">Swapna</div>
+                    </div>
+                </div>
+
+                <!-- Platinum -->
+                <div class="tier-group tier-platinum">
+                    <div class="tier-header">
+                        <span class="tier-name">💎 Platinum Plan</span>
+                        <span class="tier-badge badge-platinum">Elite</span>
+                    </div>
+                    <div class="role-grid">
+                        <div class="role-pill" onclick="fill('admin_platinum_imperial')">Admin</div>
+                        <div class="role-pill" onclick="fill('principal_platinum_imperial')">Principal</div>
+                        <div class="role-pill" onclick="fill('teacher_platinum_imperial')">Teacher</div>
+                        <div class="role-pill" onclick="fill('accountant_platinum_imperial')">Accountant</div>
+                        <div class="role-pill" onclick="fill('student_platinum_imperial')">Student</div>
+                        <div class="role-pill" onclick="fill('parent_platinum_imperial')">Parent</div>
+                        <div class="role-pill" onclick="fill('teacher_olivia')">Olivia</div>
+                        <div class="role-pill" onclick="fill('teacher_mokshith')">Mokshith</div>
+                    </div>
+                </div>
+
+                <div class="pw-hint">Click any role above &bull; password: <code>school123</code></div>
             </div>
         </div>
     </div>
 
     <script>
+        // Quick-fill username from role pill
+        function fill(u) {
+            document.getElementById('username').value = u;
+            document.getElementById('password').value = 'school123';
+            // Scroll to the form on mobile
+            document.getElementById('username').scrollIntoView({behavior:'smooth', block:'center'});
+            // Brief highlight on the Sign In button
+            const btn = document.querySelector('.btn-login');
+            btn.style.transform = 'scale(1.03)';
+            setTimeout(function(){ btn.style.transform = ''; }, 250);
+        }
+
         // Twinkling star field
         (function() {
             var container = document.getElementById('stars');
