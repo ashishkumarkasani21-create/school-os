@@ -85,7 +85,7 @@
         /* ── Card ── */
         .login-wrapper {
             position:relative; z-index:10;
-            display:flex; max-width:480px; width:100%;
+            display:flex; max-width:860px; width:100%;
             background:rgba(255,255,255,0.72);
             backdrop-filter:blur(28px) saturate(180%);
             -webkit-backdrop-filter:blur(28px) saturate(180%);
@@ -196,7 +196,48 @@
             margin-bottom:16px; display:flex; align-items:center; gap:8px;
         }
 
-        /* No demo panel */
+        /* ── Plans Panel ── */
+        .plans-side {
+            width:380px; flex-shrink:0;
+            background:rgba(0,0,0,0.015); border-left:1px solid var(--border);
+            padding:32px 24px; display:flex; flex-direction:column;
+            overflow-y:auto; max-height:640px;
+        }
+        .plans-hdr { font-size:14px; font-weight:800; margin-bottom:18px; display:flex; align-items:center; gap:8px; color:var(--primary); }
+        .plans-hdr i { color:var(--accent); }
+
+        .plan-card {
+            margin-bottom:14px; border-radius:12px; border:1px solid var(--border);
+            background:#ffffff; overflow:hidden; transition:transform 0.2s, box-shadow 0.2s;
+        }
+        .plan-card:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0,0,0,0.03); }
+        .plan-header { display:flex; align-items:center; justify-content:space-between; padding:11px 14px; font-size:12px; font-weight:700; border-bottom:1px solid var(--border); }
+        .plan-name { color:var(--text); font-weight:800; }
+        .plan-badge { font-size:9.5px; padding:3px 9px; border-radius:20px; font-weight:800; text-transform:uppercase; }
+
+        .plan-silver .plan-header { background:rgba(100,116,139,0.06); }
+        .badge-silver { background:#e2e8f0; color:#475569; }
+        .plan-gold .plan-header { background:rgba(245,158,11,0.06); }
+        .badge-gold { background:#fef3c7; color:#b45309; }
+        .plan-platinum .plan-header { background:rgba(6,182,212,0.06); }
+        .badge-platinum { background:#ecfeff; color:#0e7490; }
+
+        .plan-price { font-size:11.5px; font-weight:700; color:var(--text); }
+
+        .plan-features { padding:10px 14px 12px; list-style:none; }
+        .plan-features li { font-size:11px; color:var(--text-muted); margin-bottom:6px; display:flex; align-items:center; gap:6px; }
+        .plan-features li:last-child { margin-bottom:0; }
+        .plan-features li i { font-size:10px; color:var(--primary); }
+
+        @media(max-width:768px){
+            .login-wrapper{flex-direction:column;max-width:480px}
+            .plans-side{width:100%;max-height:none;border-left:none;border-top:1px solid var(--border)}
+            .form-side{padding:36px 28px}
+        }
+        @media(max-width:420px){
+            .form-side{padding:28px 18px}
+            .plans-side{padding:22px 18px}
+        }
     </style>
 </head>
 <body>
@@ -268,7 +309,69 @@
                     <i class="fa-solid fa-arrow-right-to-bracket" style="margin-right:8px"></i>Sign In to Portal
                 </button>
             </form>
-        </div>    </div>
+        </div>
+
+        <!-- Right Side: Subscription Plans -->
+        <div class="plans-side">
+            <div class="plans-hdr">
+                <i class="fa-solid fa-gem"></i> Subscription Plans
+            </div>
+
+            <!-- Silver Plan -->
+            <div class="plan-card plan-silver">
+                <div class="plan-header">
+                    <span class="plan-name">Silver Plan</span>
+                    <span class="plan-badge badge-silver">Core</span>
+                </div>
+                <div style="padding:10px 14px 2px; display:flex; justify-content:space-between; align-items:center;">
+                    <span style="font-size:11px; color:var(--text-muted);">Yearly Price</span>
+                    <span class="plan-price">{{ active_currency.symbol }}{{ active_currency.silver }}/yr</span>
+                </div>
+                <ul class="plan-features">
+                    <li><i class="fa-solid fa-circle-check"></i> Core Academics Module</li>
+                    <li><i class="fa-solid fa-circle-check"></i> Student & Teacher Directory</li>
+                    <li><i class="fa-solid fa-circle-check"></i> Daily Attendance Logs</li>
+                    <li><i class="fa-solid fa-circle-check"></i> Homework Assignments</li>
+                </ul>
+            </div>
+
+            <!-- Gold Plan -->
+            <div class="plan-card plan-gold">
+                <div class="plan-header">
+                    <span class="plan-name">Gold Plan</span>
+                    <span class="plan-badge badge-gold">Standard</span>
+                </div>
+                <div style="padding:10px 14px 2px; display:flex; justify-content:space-between; align-items:center;">
+                    <span style="font-size:11px; color:var(--text-muted);">Yearly Price</span>
+                    <span class="plan-price">{{ active_currency.symbol }}{{ active_currency.gold }}/yr</span>
+                </div>
+                <ul class="plan-features">
+                    <li><i class="fa-solid fa-circle-check"></i> Complete Fee Management</li>
+                    <li><i class="fa-solid fa-circle-check"></i> Live Timetable Planner</li>
+                    <li><i class="fa-solid fa-circle-check"></i> Exams & Grading Schemes</li>
+                    <li><i class="fa-solid fa-circle-check"></i> Leaves Workflow & Basic OCR</li>
+                </ul>
+            </div>
+
+            <!-- Platinum Plan -->
+            <div class="plan-card plan-platinum">
+                <div class="plan-header">
+                    <span class="plan-name">Platinum Plan</span>
+                    <span class="plan-badge badge-platinum">Elite</span>
+                </div>
+                <div style="padding:10px 14px 2px; display:flex; justify-content:space-between; align-items:center;">
+                    <span style="font-size:11px; color:var(--text-muted);">Yearly Price</span>
+                    <span class="plan-price">{{ active_currency.symbol }}{{ active_currency.platinum }}/yr</span>
+                </div>
+                <ul class="plan-features">
+                    <li><i class="fa-solid fa-circle-check"></i> Live GPS School Bus Tracking</li>
+                    <li><i class="fa-solid fa-circle-check"></i> Premium OCR Admissions & Receipts</li>
+                    <li><i class="fa-solid fa-circle-check"></i> Advanced Analytics & School Performance</li>
+                    <li><i class="fa-solid fa-circle-check"></i> Multi-branch Security Audit Logs</li>
+                </ul>
+            </div>
+        </div>
+    </div>
 
     <script>
         // Twinkling star field
