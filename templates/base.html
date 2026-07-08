@@ -517,7 +517,8 @@
                     </a>
                 </li>
 
-                <!-- OCR uploading and integration review -->
+                <!-- OCR uploading and integration review — hidden from parents and students -->
+                {% if request.user.role != 'parent' and request.user.role != 'student' %}
                 <li>
                     <a href="#" onclick="document.getElementById('ocr-upload-modal').style.display='block'" class="menu-link">
                         <i class="fa-solid fa-expand"></i>
@@ -527,6 +528,7 @@
                         {% endif %}
                     </a>
                 </li>
+                {% endif %}
 
                 <!-- SaaS Subscription Plans -->
                 <li>
@@ -594,22 +596,21 @@
         </div>
     </div>
 
-    <!-- Universal OCR Upload modal -->
-    {% if request.user.is_authenticated %}
-    <div id="ocr-upload-modal" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(0,0,0,0.6); z-index: 1000; align-items: center; justify-content: center; display: none;">
-        <div class="card" style="width: 500px; margin: 15% auto; background-color: var(--bg-secondary);">
+    <!-- Universal OCR Upload modal — only for staff roles, not parent/student -->
+    {% if request.user.is_authenticated and request.user.role != 'parent' and request.user.role != 'student' %}
+    <div id="ocr-upload-modal" style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; background-color:rgba(0,0,0,0.6); z-index:1000;">
+        <div class="card" style="width:500px; margin:12% auto; background-color:var(--bg-secondary);">
             <div class="card-header">
-                <span class="card-title">Upload Document for OCR Extraction</span>
-                <span style="cursor: pointer;" onclick="document.getElementById('ocr-upload-modal').style.display='none'"><i class="fa-solid fa-xmark"></i></span>
+                <span class="card-title"><i class="fa-solid fa-expand" style="margin-right:8px;"></i>Upload Document for OCR Extraction</span>
+                <span style="cursor:pointer;" onclick="document.getElementById('ocr-upload-modal').style.display='none'"><i class="fa-solid fa-xmark"></i></span>
             </div>
-            
-            {% if school_plan == 'starter' %}
-                <div class="alert alert-warning">
+            {% if school_plan == 'silver' %}
+                <div class="alert alert-warning" style="margin:16px;">
                     <i class="fa-solid fa-lock"></i>
-                    <span>OCR processing is locked. Upgrade to **Growth** or **Premium** to enable scanned admissions, marksheets, and payment receipts digitization!</span>
+                    <span>OCR is a <strong>Gold/Platinum</strong> feature. Upgrade your plan to enable scanned admissions, marksheets, and receipt digitization.</span>
                 </div>
             {% else %}
-                <form action="{% url 'upload_ocr' %}" method="post" enctype="multipart/form-data">
+                <form action="{% url 'upload_ocr' %}" method="post" enctype="multipart/form-data" style="padding:0 16px 16px;">
                     {% csrf_token %}
                     <div class="form-group">
                         <label for="document_type">Document Category</label>
@@ -623,9 +624,9 @@
                         <label for="document_file">Scanned Image / PDF</label>
                         <input type="file" name="document_file" id="document_file" class="form-control" accept="image/*,application/pdf" required>
                     </div>
-                    <div style="display: flex; justify-content: flex-end; gap: 12px; margin-top: 20px;">
+                    <div style="display:flex; justify-content:flex-end; gap:12px; margin-top:20px;">
                         <button type="button" class="btn btn-secondary" onclick="document.getElementById('ocr-upload-modal').style.display='none'">Cancel</button>
-                        <button type="submit" class="btn btn-primary">Process Document</button>
+                        <button type="submit" class="btn btn-primary"><i class="fa-solid fa-wand-magic-sparkles" style="margin-right:6px;"></i>Process Document</button>
                     </div>
                 </form>
             {% endif %}
