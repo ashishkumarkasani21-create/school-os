@@ -146,6 +146,21 @@ class Command(BaseCommand):
                 name='English Literature',
                 code='ENG10'
             )
+            science_sub, _ = Subject.objects.get_or_create(
+                school=school,
+                name='Science',
+                code='SCI10'
+            )
+            social_sub, _ = Subject.objects.get_or_create(
+                school=school,
+                name='Social Studies',
+                code='SOC10'
+            )
+            cs_sub, _ = Subject.objects.get_or_create(
+                school=school,
+                name='Computer Science',
+                code='COMP10'
+            )
 
             ClassSubject.objects.get_or_create(
                 class_room=classroom,
@@ -155,6 +170,21 @@ class Command(BaseCommand):
             ClassSubject.objects.get_or_create(
                 class_room=classroom,
                 subject=english_sub,
+                defaults={'teacher': teacher_prof}
+            )
+            ClassSubject.objects.get_or_create(
+                class_room=classroom,
+                subject=science_sub,
+                defaults={'teacher': teacher_prof}
+            )
+            ClassSubject.objects.get_or_create(
+                class_room=classroom,
+                subject=social_sub,
+                defaults={'teacher': teacher_prof}
+            )
+            ClassSubject.objects.get_or_create(
+                class_room=classroom,
+                subject=cs_sub,
                 defaults={'teacher': teacher_prof}
             )
 
@@ -345,14 +375,23 @@ class Command(BaseCommand):
         plat_school = schools.get('platinum')
 
         custom_teachers = [
-            ('Olivia',   'Smith',   'teacher_olivia',   plat_school,   'Grade 9',  'A'),
-            ('Mokshith', 'Kumar',   'teacher_mokshith', plat_school,   'Grade 10', 'B'),
-            ('Ashish',   'Kasani',  'teacher_ashish',   gold_school,   'Grade 8',  'A'),
-            ('Swapna',   'Reddy',   'teacher_swapna',   gold_school,   'Grade 7',  'B'),
-            ('John',     'Martin',  'teacher_john',     silver_school, 'Grade 6',  'A'),
+            # Platinum school
+            ('Olivia',   'Smith',   'teacher_olivia',   plat_school,   'Grade 9',  'A', 'SCI10'),
+            ('Mokshith', 'Kumar',   'teacher_mokshith', plat_school,   'Grade 10', 'B', 'MATH10'),
+            ('Sophia',   'Davis',   'teacher_sophia',   plat_school,   'Grade 11', 'A', 'ENG10'),
+            ('Liam',     'Wilson',  'teacher_liam',     plat_school,   'Grade 12', 'A', 'COMP10'),
+            # Gold school
+            ('Ashish',   'Kasani',  'teacher_ashish',   gold_school,   'Grade 8',  'A', 'MATH10'),
+            ('Swapna',   'Reddy',   'teacher_swapna',   gold_school,   'Grade 7',  'B', 'SOC10'),
+            ('Noah',     'Taylor',  'teacher_noah',     gold_school,   'Grade 9',  'B', 'SCI10'),
+            ('Emma',     'Thomas',  'teacher_emma',     gold_school,   'Grade 10', 'A', 'ENG10'),
+            # Silver school
+            ('John',     'Martin',  'teacher_john',     silver_school, 'Grade 6',  'A', 'ENG10'),
+            ('Lucas',    'Moore',   'teacher_lucas',    silver_school, 'Grade 8',  'B', 'MATH10'),
+            ('Isabella', 'Anderson','teacher_isabella', silver_school, 'Grade 7',  'A', 'SCI10'),
         ]
 
-        for first, last, username, school, class_name, section in custom_teachers:
+        for first, last, username, school, class_name, section, sub_code in custom_teachers:
             if not school:
                 continue
             # Create user
@@ -386,6 +425,15 @@ class Command(BaseCommand):
             # Assign teacher to classroom
             classroom.class_teacher = profile
             classroom.save()
+
+            # Fetch subject and assign to teacher in this classroom
+            subject = Subject.objects.filter(school=school, code=sub_code).first()
+            if subject:
+                ClassSubject.objects.get_or_create(
+                    class_room=classroom,
+                    subject=subject,
+                    defaults={'teacher': profile}
+                )
 
         self.stdout.write(self.style.SUCCESS('Successfully seeded database with all roles, classes, fee tables, bus routes, and custom teachers!'))
 

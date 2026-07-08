@@ -84,6 +84,8 @@ Password for all: **`school123`**
 | Teacher | `teacher_silver` |
 | Student | `student_silver` |
 | Teacher (John) | `teacher_john` |
+| Teacher (Lucas) | `teacher_lucas` |
+| Teacher (Isabella) | `teacher_isabella` |
 
 ### 🥇 Gold
 | Role | Username |
@@ -94,6 +96,8 @@ Password for all: **`school123`**
 | Accountant | `accountant_gold` |
 | Teacher (Ashish) | `teacher_ashish` |
 | Teacher (Swapna) | `teacher_swapna` |
+| Teacher (Noah) | `teacher_noah` |
+| Teacher (Emma) | `teacher_emma` |
 
 ### 💎 Platinum
 | Role | Username |
@@ -106,6 +110,8 @@ Password for all: **`school123`**
 | Parent | `parent_platinum` |
 | Teacher (Olivia) | `teacher_olivia` |
 | Teacher (Mokshith) | `teacher_mokshith` |
+| Teacher (Sophia) | `teacher_sophia` |
+| Teacher (Liam) | `teacher_liam` |
 
 ---
 
