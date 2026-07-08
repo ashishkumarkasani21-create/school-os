@@ -104,9 +104,13 @@
         /* ── Form side ── */
         .form-side {
             flex:1; padding:50px 46px;
-            display:flex; flex-direction:column; justify-content:center; min-width:0;
+            display:flex; flex-direction:column; justify-content:center; align-items:center; min-width:0;
+            text-align:center;
         }
-        .brand { display:flex; align-items:center; gap:14px; margin-bottom:38px; }
+        /* Make form elements full-width while form-side is centered */
+        .form-side form, .form-side .country-bar, .form-side .alert-error,
+        .form-side .form-group, .form-side .btn-login { width:100%; max-width:340px; }
+        .brand { display:flex; align-items:center; justify-content:center; gap:14px; margin-bottom:38px; width:100%; max-width:340px; }
         .brand-icon {
             width:48px; height:48px;
             background:linear-gradient(135deg,var(--primary),var(--accent));
@@ -128,11 +132,11 @@
             letter-spacing:1.8px; text-transform:uppercase;
         }
         h1.headline {
-            font-size:28px; font-weight:900; letter-spacing:-0.5px; margin-bottom:6px;
+            font-size:36px; font-weight:900; letter-spacing:-1px; margin-bottom:8px; line-height:1.1;
             background:linear-gradient(135deg,#3b82f6 0%,#8b5cf6 50%,#ec4899 100%);
             -webkit-background-clip:text; -webkit-text-fill-color:transparent;
         }
-        .subline { color:var(--text-muted); font-size:13px; margin-bottom:28px; line-height:1.6; }
+        .subline { color:var(--text-muted); font-size:13px; margin-bottom:28px; line-height:1.6; width:100%; max-width:340px; }
 
         /* Country bar */
         .country-bar {
@@ -153,8 +157,8 @@
         .country-select:hover { border-color:var(--primary); }
 
         /* Inputs */
-        .form-group { margin-bottom:16px; }
-        .form-group label { display:block; font-size:11.5px; font-weight:600; color:var(--text-muted); margin-bottom:7px; }
+        .form-group { margin-bottom:16px; text-align:left; }
+        .form-group label { display:block; font-size:11.5px; font-weight:600; color:var(--text-muted); margin-bottom:7px; text-align:left; }
         .input-wrap { position:relative; }
         .input-wrap i {
             position:absolute; left:14px; top:50%; transform:translateY(-50%);
@@ -198,9 +202,16 @@
 
         /* ── Plans Panel ── */
         .plans-side {
-            width:380px; flex-shrink:0;
+            width:740px; flex-shrink:0;
             background:rgba(0,0,0,0.015); border-left:1px solid var(--border);
-            padding:32px 24px; display:flex; flex-direction:column;
+            padding:32px 28px; display:flex; flex-direction:column;
+        }
+        /* Inner 2-column grid: plans | quick-login */
+        .plans-inner {
+            display:grid;
+            grid-template-columns:1fr 1fr;
+            gap:24px;
+            align-items:start;
         }
         .plans-hdr { font-size:14px; font-weight:800; margin-bottom:18px; display:flex; align-items:center; gap:8px; color:var(--primary); }
         .plans-hdr i { color:var(--accent); }
@@ -251,9 +262,12 @@
         }
         .pw-hint code { font-family:monospace; color:var(--primary); font-weight:700; }
 
-        @media(max-width:768px){
-            .login-wrapper{flex-direction:column;max-width:480px}
-            .plans-side{width:100%;max-height:none;border-left:none;border-top:1px solid var(--border)}
+        @media(max-width:1100px){
+            .plans-inner{grid-template-columns:1fr}
+        }
+        @media(max-width:900px){
+            .login-wrapper{flex-direction:column;max-width:560px}
+            .plans-side{width:100%;border-left:none;border-top:1px solid var(--border)}
             .form-side{padding:36px 28px}
         }
         @media(max-width:420px){
@@ -333,124 +347,123 @@
             </form>
         </div>
 
-        <!-- Right Side: Subscription Plans -->
+        <!-- Right Side: Combined Plans + Quick Login -->
         <div class="plans-side">
-            <div class="plans-hdr">
-                <i class="fa-solid fa-gem"></i> Subscription Plans
-            </div>
+            <div class="plans-inner">
 
-            <!-- Silver Plan -->
-            <div class="plan-card plan-silver">
-                <div class="plan-header">
-                    <span class="plan-name">Silver Plan</span>
-                    <span class="plan-badge badge-silver">Core</span>
-                </div>
-                <div style="padding:10px 14px 2px; display:flex; justify-content:space-between; align-items:center;">
-                    <span style="font-size:11px; color:var(--text-muted);">Yearly Price</span>
-                    <span class="plan-price">{{ active_currency.symbol }}{{ active_currency.silver }}/yr</span>
-                </div>
-                <ul class="plan-features">
-                    <li><i class="fa-solid fa-circle-check"></i> Core Academics Module</li>
-                    <li><i class="fa-solid fa-circle-check"></i> Student & Teacher Directory</li>
-                    <li><i class="fa-solid fa-circle-check"></i> Daily Attendance Logs</li>
-                    <li><i class="fa-solid fa-circle-check"></i> Homework Assignments</li>
-                </ul>
-            </div>
-
-            <!-- Gold Plan -->
-            <div class="plan-card plan-gold">
-                <div class="plan-header">
-                    <span class="plan-name">Gold Plan</span>
-                    <span class="plan-badge badge-gold">Standard</span>
-                </div>
-                <div style="padding:10px 14px 2px; display:flex; justify-content:space-between; align-items:center;">
-                    <span style="font-size:11px; color:var(--text-muted);">Yearly Price</span>
-                    <span class="plan-price">{{ active_currency.symbol }}{{ active_currency.gold }}/yr</span>
-                </div>
-                <ul class="plan-features">
-                    <li><i class="fa-solid fa-circle-check"></i> Complete Fee Management</li>
-                    <li><i class="fa-solid fa-circle-check"></i> Live Timetable Planner</li>
-                    <li><i class="fa-solid fa-circle-check"></i> Exams & Grading Schemes</li>
-                    <li><i class="fa-solid fa-circle-check"></i> Leaves Workflow & Basic OCR</li>
-                </ul>
-            </div>
-
-            <!-- Platinum Plan -->
-            <div class="plan-card plan-platinum">
-                <div class="plan-header">
-                    <span class="plan-name">Platinum Plan</span>
-                    <span class="plan-badge badge-platinum">Elite</span>
-                </div>
-                <div style="padding:10px 14px 2px; display:flex; justify-content:space-between; align-items:center;">
-                    <span style="font-size:11px; color:var(--text-muted);">Yearly Price</span>
-                    <span class="plan-price">{{ active_currency.symbol }}{{ active_currency.platinum }}/yr</span>
-                </div>
-                <ul class="plan-features">
-                    <li><i class="fa-solid fa-circle-check"></i> Live GPS School Bus Tracking</li>
-                    <li><i class="fa-solid fa-circle-check"></i> Premium OCR Admissions & Receipts</li>
-                    <li><i class="fa-solid fa-circle-check"></i> Advanced Analytics & School Performance</li>
-                    <li><i class="fa-solid fa-circle-check"></i> Multi-branch Security Audit Logs</li>
-                </ul>
-            </div>
-
-            </div>
-
-            <!-- Demo Account Quick Login -->
-            <div style="margin-top:8px; border-top:1px solid var(--border); padding-top:16px;">
-                <div class="plans-hdr" style="margin-bottom:14px;">
-                    <i class="fa-solid fa-wand-magic-sparkles"></i> Quick Login
-                </div>
-
-                <!-- Silver -->
-                <div class="tier-group tier-silver">
-                    <div class="tier-header">
-                        <span class="tier-name">🥈 Silver Plan</span>
-                        <span class="tier-badge badge-silver">Core</span>
+                <!-- LEFT: Subscription Plans -->
+                <div>
+                    <div class="plans-hdr">
+                        <i class="fa-solid fa-gem"></i> Subscription Plans
                     </div>
-                    <div class="role-grid">
-                        <div class="role-pill" onclick="fill('admin_silver_stars')">Admin</div>
-                        <div class="role-pill" onclick="fill('principal_silver_stars')">Principal</div>
-                        <div class="role-pill" onclick="fill('teacher_silver_stars')">Teacher</div>
-                        <div class="role-pill" onclick="fill('student_silver_stars')">Student</div>
-                        <div class="role-pill" onclick="fill('teacher_john')">John</div>
+
+                    <!-- Silver Plan -->
+                    <div class="plan-card plan-silver">
+                        <div class="plan-header">
+                            <span class="plan-name">Silver Plan</span>
+                            <span class="plan-badge badge-silver">Core</span>
+                        </div>
+                        <div style="padding:10px 14px 2px; display:flex; justify-content:space-between; align-items:center;">
+                            <span style="font-size:11px; color:var(--text-muted);">Yearly Price</span>
+                            <span class="plan-price">{{ active_currency.symbol }}{{ active_currency.silver }}/yr</span>
+                        </div>
+                        <ul class="plan-features">
+                            <li><i class="fa-solid fa-circle-check"></i> Core Academics Module</li>
+                            <li><i class="fa-solid fa-circle-check"></i> Student &amp; Teacher Directory</li>
+                            <li><i class="fa-solid fa-circle-check"></i> Daily Attendance Logs</li>
+                            <li><i class="fa-solid fa-circle-check"></i> Homework Assignments</li>
+                        </ul>
+                    </div>
+
+                    <!-- Gold Plan -->
+                    <div class="plan-card plan-gold">
+                        <div class="plan-header">
+                            <span class="plan-name">Gold Plan</span>
+                            <span class="plan-badge badge-gold">Standard</span>
+                        </div>
+                        <div style="padding:10px 14px 2px; display:flex; justify-content:space-between; align-items:center;">
+                            <span style="font-size:11px; color:var(--text-muted);">Yearly Price</span>
+                            <span class="plan-price">{{ active_currency.symbol }}{{ active_currency.gold }}/yr</span>
+                        </div>
+                        <ul class="plan-features">
+                            <li><i class="fa-solid fa-circle-check"></i> Complete Fee Management</li>
+                            <li><i class="fa-solid fa-circle-check"></i> Live Timetable Planner</li>
+                            <li><i class="fa-solid fa-circle-check"></i> Exams &amp; Grading Schemes</li>
+                            <li><i class="fa-solid fa-circle-check"></i> Leaves Workflow &amp; Basic OCR</li>
+                        </ul>
+                    </div>
+
+                    <!-- Platinum Plan -->
+                    <div class="plan-card plan-platinum">
+                        <div class="plan-header">
+                            <span class="plan-name">Platinum Plan</span>
+                            <span class="plan-badge badge-platinum">Elite</span>
+                        </div>
+                        <div style="padding:10px 14px 2px; display:flex; justify-content:space-between; align-items:center;">
+                            <span style="font-size:11px; color:var(--text-muted);">Yearly Price</span>
+                            <span class="plan-price">{{ active_currency.symbol }}{{ active_currency.platinum }}/yr</span>
+                        </div>
+                        <ul class="plan-features">
+                            <li><i class="fa-solid fa-circle-check"></i> Live GPS School Bus Tracking</li>
+                            <li><i class="fa-solid fa-circle-check"></i> Premium OCR Admissions &amp; Receipts</li>
+                            <li><i class="fa-solid fa-circle-check"></i> Advanced Analytics &amp; Performance</li>
+                            <li><i class="fa-solid fa-circle-check"></i> Multi-branch Security Audit Logs</li>
+                        </ul>
                     </div>
                 </div>
 
-                <!-- Gold -->
-                <div class="tier-group tier-gold">
-                    <div class="tier-header">
-                        <span class="tier-name">🥇 Gold Plan</span>
-                        <span class="tier-badge badge-gold">Standard</span>
+                <!-- RIGHT: Quick Login -->
+                <div>
+                    <div class="plans-hdr" style="margin-bottom:14px;">
+                        <i class="fa-solid fa-wand-magic-sparkles"></i> Quick Login
                     </div>
-                    <div class="role-grid">
-                        <div class="role-pill" onclick="fill('admin_gold_beacon')">Admin</div>
-                        <div class="role-pill" onclick="fill('principal_gold_beacon')">Principal</div>
-                        <div class="role-pill" onclick="fill('teacher_gold_beacon')">Teacher</div>
-                        <div class="role-pill" onclick="fill('accountant_gold_beacon')">Accountant</div>
-                        <div class="role-pill" onclick="fill('teacher_ashish')">Ashish</div>
-                        <div class="role-pill" onclick="fill('teacher_swapna')">Swapna</div>
-                    </div>
-                </div>
 
-                <!-- Platinum -->
-                <div class="tier-group tier-platinum">
-                    <div class="tier-header">
-                        <span class="tier-name">💎 Platinum Plan</span>
-                        <span class="tier-badge badge-platinum">Elite</span>
+                    <!-- Silver -->
+                    <div class="tier-group tier-silver">
+                        <div class="tier-header">
+                            <span class="tier-name">🥈 Silver Plan</span>
+                            <span class="tier-badge badge-silver">Core</span>
+                        </div>
+                        <div class="role-grid">
+                            <div class="role-pill" onclick="fill('admin_silver_stars')">Admin</div>
+                            <div class="role-pill" onclick="fill('principal_silver_stars')">Principal</div>
+                            <div class="role-pill" onclick="fill('teacher_silver_stars')">Teacher</div>
+                            <div class="role-pill" onclick="fill('student_silver_stars')">Student</div>
+                        </div>
                     </div>
-                    <div class="role-grid">
-                        <div class="role-pill" onclick="fill('admin_platinum_imperial')">Admin</div>
-                        <div class="role-pill" onclick="fill('principal_platinum_imperial')">Principal</div>
-                        <div class="role-pill" onclick="fill('teacher_platinum_imperial')">Teacher</div>
-                        <div class="role-pill" onclick="fill('accountant_platinum_imperial')">Accountant</div>
-                        <div class="role-pill" onclick="fill('student_platinum_imperial')">Student</div>
-                        <div class="role-pill" onclick="fill('parent_platinum_imperial')">Parent</div>
-                        <div class="role-pill" onclick="fill('teacher_olivia')">Olivia</div>
-                        <div class="role-pill" onclick="fill('teacher_mokshith')">Mokshith</div>
-                    </div>
-                </div>
 
-                <div class="pw-hint">Click any role above &bull; password: <code>school123</code></div>
+                    <!-- Gold -->
+                    <div class="tier-group tier-gold">
+                        <div class="tier-header">
+                            <span class="tier-name">🥇 Gold Plan</span>
+                            <span class="tier-badge badge-gold">Standard</span>
+                        </div>
+                        <div class="role-grid">
+                            <div class="role-pill" onclick="fill('admin_gold_beacon')">Admin</div>
+                            <div class="role-pill" onclick="fill('principal_gold_beacon')">Principal</div>
+                            <div class="role-pill" onclick="fill('teacher_gold_beacon')">Teacher</div>
+                            <div class="role-pill" onclick="fill('accountant_gold_beacon')">Accountant</div>
+                        </div>
+                    </div>
+
+                    <!-- Platinum -->
+                    <div class="tier-group tier-platinum">
+                        <div class="tier-header">
+                            <span class="tier-name">💎 Platinum Plan</span>
+                            <span class="tier-badge badge-platinum">Elite</span>
+                        </div>
+                        <div class="role-grid">
+                            <div class="role-pill" onclick="fill('admin_platinum_imperial')">Admin</div>
+                            <div class="role-pill" onclick="fill('principal_platinum_imperial')">Principal</div>
+                            <div class="role-pill" onclick="fill('teacher_platinum_imperial')">Teacher</div>
+                            <div class="role-pill" onclick="fill('accountant_platinum_imperial')">Accountant</div>
+                            <div class="role-pill" onclick="fill('student_platinum_imperial')">Student</div>
+                            <div class="role-pill" onclick="fill('parent_platinum_imperial')">Parent</div>
+                        </div>
+                    </div>
+
+                    <div class="pw-hint">Click any role &bull; password: <code>school123</code></div>
+                </div>
             </div>
         </div>
     </div>
