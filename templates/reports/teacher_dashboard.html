@@ -51,6 +51,15 @@
                             <label for="attendance_date" style="font-size: 13px; font-weight: 600; margin-bottom: 6px; display: block;">Select Date</label>
                             <input type="date" name="attendance_date" id="attendance_date" class="form-control" value="{{ today|date:'Y-m-d' }}" required>
                         </div>
+                        <div style="flex: 1;">
+                            <label for="attendance_subject_id" style="font-size: 13px; font-weight: 600; margin-bottom: 6px; display: block;">Select Subject</label>
+                            <select name="subject_id" id="attendance_subject_id" class="form-control" required>
+                                <option value="">-- Choose Subject --</option>
+                                {% for cs in class_subjects %}
+                                    <option value="{{ cs.subject.id }}">{{ cs.subject.name }} ({{ cs.class_room.name }} - {{ cs.class_room.section }})</option>
+                                {% endfor %}
+                            </select>
+                        </div>
                     </div>
 
                     {% for class_room in classes %}

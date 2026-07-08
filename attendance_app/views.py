@@ -21,6 +21,12 @@ def record_attendance(request):
         else:
             attendance_date = datetime.date.today()
         
+        subject_id = request.POST.get('subject_id')
+        subject = None
+        if subject_id:
+            from academics.models import Subject
+            subject = Subject.objects.filter(id=subject_id, school=request.user.school).first()
+
         logged_count = 0
         for key, val in request.POST.items():
             if key.startswith('status_'):
@@ -31,6 +37,7 @@ def record_attendance(request):
                     Attendance.objects.update_or_create(
                         student=student,
                         date=attendance_date,
+                        subject=subject,
                         defaults={'status': val, 'remarks': remarks}
                     )
                     logged_count += 1
