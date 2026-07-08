@@ -88,36 +88,43 @@
         </div>
 
         <!-- Grade Report Card -->
-        <div class="card">
+        <div class="card" style="overflow-x: auto;">
             <div class="card-header">
-                <span class="card-title"><i class="fa-solid fa-star"></i> My Grade Registry & Marks</span>
+                <span class="card-title"><i class="fa-solid fa-star"></i> My Grade Registry &amp; Marks</span>
             </div>
             
-            <table>
+            <table style="min-width: 500px;">
                 <thead>
                     <tr>
                         <th>Exam Name</th>
-                        <th>Subject</th>
-                        <th>Marks Obtained</th>
-                        <th>Max Marks</th>
-                        <th>Grade</th>
+                        {% for sub in report_card_subjects %}
+                            <th>{{ sub.name }}</th>
+                        {% endfor %}
                     </tr>
                 </thead>
                 <tbody>
-                    {% for mk in marks %}
+                    {% for row in report_card_rows %}
                         <tr>
-                            <td>{{ mk.exam_schedule.exam.name }}</td>
-                            <td>{{ mk.exam_schedule.subject.name }}</td>
-                            <td>{{ mk.marks_obtained }}</td>
-                            <td>{{ mk.exam_schedule.max_marks }}</td>
-                            <td>
-                                <span class="school-badge" style="background-color: var(--primary-light); color: var(--primary); font-size: 11px;">
-                                    {{ mk.grade }}
-                                </span>
-                            </td>
+                            <td><strong>{{ row.exam.name }}</strong></td>
+                            {% for cell in row.cells %}
+                                <td>
+                                    {% if cell %}
+                                        <div style="font-weight: 600; font-size: 13px;">{{ cell.obtained }} / {{ cell.max }}</div>
+                                        <span class="school-badge" style="background-color: var(--primary-light); color: var(--primary); font-size: 10px; padding: 2px 6px; margin-top: 4px; display: inline-block;">
+                                            Grade: {{ cell.grade }}
+                                        </span>
+                                    {% else %}
+                                        <span style="color: var(--text-muted);">-</span>
+                                    {% endif %}
+                                </td>
+                            {% endfor %}
                         </tr>
                     {% empty %}
-                        <tr><td colspan="5" style="text-align: center; color: var(--text-muted);">No marks published yet.</td></tr>
+                        <tr>
+                            <td colspan="10" style="text-align: center; color: var(--text-muted); padding: 20px 0;">
+                                No marks published yet.
+                            </td>
+                        </tr>
                     {% endfor %}
                 </tbody>
             </table>
@@ -149,7 +156,7 @@
         <!-- Fee Invoice summary -->
         <div class="card">
             <div class="card-header">
-                <span class="card-title"><i class="fa-solid fa-dollar-sign"></i> Outstanding Invoices</span>
+                <span class="card-title"><i class="fa-solid fa-receipt"></i> Outstanding Invoices</span>
             </div>
             
             <div style="display: flex; flex-direction: column; gap: 12px;">
@@ -161,15 +168,15 @@
                         </div>
                         <div style="display: flex; justify-content: space-between; font-size: 13px; margin-top: 10px; color: var(--text-muted);">
                             <span>Total Due:</span>
-                            <span>${{ fee.net_amount }}</span>
+                            <span>{{ active_currency.symbol }}{{ fee.net_amount }}</span>
                         </div>
                         <div style="display: flex; justify-content: space-between; font-size: 13px; color: var(--text-muted);">
                             <span>Paid amount:</span>
-                            <span>${{ fee.paid_amount }}</span>
+                            <span>{{ active_currency.symbol }}{{ fee.paid_amount }}</span>
                         </div>
                         <div style="display: flex; justify-content: space-between; font-size: 13px; border-top: 1px dashed var(--border); padding-top: 6px; margin-top: 6px; font-weight: 700;">
                             <span>Balance Due:</span>
-                            <span>${{ fee.balance }}</span>
+                            <span>{{ active_currency.symbol }}{{ fee.balance }}</span>
                         </div>
                     </div>
                 {% empty %}

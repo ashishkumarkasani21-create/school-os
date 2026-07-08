@@ -276,6 +276,7 @@ def teacher_dashboard(request):
     # Classes and subjects for the entire school to allow selecting any grade
     classes = ClassRoom.objects.filter(school=school).prefetch_related('students__user').order_by('name', 'section')
     class_subjects = ClassSubject.objects.filter(class_room__school=school).select_related('class_room', 'subject').order_by('class_room__name', 'subject__name')
+    subjects = Subject.objects.filter(school=school).order_by('name')
 
     # Homeworks assigned
     homeworks = Homework.objects.filter(teacher=teacher_prof).order_by('-date_assigned')[:10]
@@ -294,6 +295,7 @@ def teacher_dashboard(request):
         'timetable': timetable,
         'classes': classes,
         'class_subjects': class_subjects,
+        'subjects': subjects,
         'homeworks': homeworks,
         'leaves': leaves,
         'announcements': announcements,
@@ -324,8 +326,39 @@ def student_dashboard(request):
     if class_room:
         homeworks = Homework.objects.filter(class_room=class_room).order_by('-due_date')[:10]
 
-    # Student Marks
+    # Student Marks Matrix Construction
     marks = Mark.objects.filter(student=student_prof).select_related('exam_schedule__subject', 'exam_schedule__exam')
+    
+    subjects_set = set()
+    exams_set = set()
+    marks_map = {}
+    for m in marks:
+        sub = m.exam_schedule.subject
+        exam = m.exam_schedule.exam
+        subjects_set.add(sub)
+        exams_set.add(exam)
+        marks_map[(exam.id, sub.id)] = m
+
+    subjects_list = sorted(list(subjects_set), key=lambda x: x.name)
+    exams_list = sorted(list(exams_set), key=lambda x: x.name)
+
+    report_card_rows = []
+    for exam in exams_list:
+        row_cells = []
+        for sub in subjects_list:
+            m_obj = marks_map.get((exam.id, sub.id))
+            if m_obj:
+                row_cells.append({
+                    'obtained': m_obj.marks_obtained,
+                    'max': m_obj.exam_schedule.max_marks,
+                    'grade': m_obj.grade,
+                })
+            else:
+                row_cells.append(None)
+        report_card_rows.append({
+            'exam': exam,
+            'cells': row_cells,
+        })
 
     # Fees due
     fees = StudentFee.objects.filter(student=student_prof).select_related('fee_structure')
@@ -343,6 +376,8 @@ def student_dashboard(request):
         'attendance_rate': round(attendance_rate, 1),
         'homeworks': homeworks,
         'marks': marks,
+        'report_card_subjects': subjects_list,
+        'report_card_rows': report_card_rows,
         'fees': fees,
         'bus_assignment': bus_assignment,
         'announcements': announcements,

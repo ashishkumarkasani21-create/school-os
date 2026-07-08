@@ -126,6 +126,16 @@
                     {% csrf_token %}
                     
                     <div class="form-group">
+                        <label for="subject_filter">Select Subject</label>
+                        <select id="subject_filter" class="form-control" onchange="filterExamBlocks()">
+                            <option value="">-- All Subjects --</option>
+                            {% for sub in subjects %}
+                                <option value="{{ sub.id }}">{{ sub.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
                         <label for="exam_schedule_id">Select Exam Schedule Block</label>
                         <select name="exam_schedule_id" id="exam_schedule_id" class="form-control" required>
                             <option value="">-- Choose Exam Block --</option>
@@ -134,7 +144,7 @@
                                     {% if cs.class_room == cls %}
                                         {% for sched in cs.subject.examschedule_set.all %}
                                             {% if sched.class_room == cls %}
-                                                <option value="{{ sched.id }}">
+                                                <option value="{{ sched.id }}" data-subject-id="{{ cs.subject.id }}">
                                                     {{ sched.exam.name }} - {{ cls.name }} - {{ cs.subject.name }} (Max Marks: {{ sched.max_marks }})
                                                 </option>
                                             {% endif %}
@@ -322,6 +332,42 @@
 </div>
 
 <script>
+    // Store original exam schedule options on load for cross-browser filtering
+    let originalExamOptions = [];
+    window.addEventListener('DOMContentLoaded', () => {
+        const selectEl = document.getElementById('exam_schedule_id');
+        if (selectEl) {
+            for (let i = 0; i < selectEl.options.length; i++) {
+                const opt = selectEl.options[i];
+                originalExamOptions.push({
+                    value: opt.value,
+                    text: opt.text,
+                    subjectId: opt.getAttribute('data-subject-id') || ""
+                });
+            }
+        }
+    });
+
+    function filterExamBlocks() {
+        const selectedSubjectId = document.getElementById('subject_filter').value;
+        const selectEl = document.getElementById('exam_schedule_id');
+        if (!selectEl) return;
+        
+        // Clear options
+        selectEl.innerHTML = "";
+        
+        // Repopulate matching options
+        originalExamOptions.forEach(opt => {
+            if (opt.value === "" || selectedSubjectId === "" || opt.subjectId === selectedSubjectId) {
+                const newOpt = document.createElement('option');
+                newOpt.value = opt.value;
+                newOpt.text = opt.text;
+                newOpt.setAttribute('data-subject-id', opt.subjectId);
+                selectEl.appendChild(newOpt);
+            }
+        });
+    }
+
     function showTeacherTab(tabId) {
         document.querySelectorAll('.teacher-tab').forEach(tab => tab.style.display = 'none');
         document.getElementById(tabId).style.display = 'block';
