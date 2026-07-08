@@ -65,7 +65,7 @@
                         </span>
                         
                         <div style="margin-top: 12px; border-left: 2px dashed var(--border); padding-left: 12px; display: flex; flex-direction: column; gap: 8px;">
-                            {% for stop in route.stops.all %}
+                            {% for stop in route.stops %}
                                 <div style="position: relative; font-size: 12px;">
                                     <div style="width: 8px; height: 8px; border-radius: 50%; background-color: var(--primary); position: absolute; left: -17px; top: 4px;"></div>
                                     <span>{{ stop.name }}</span>
@@ -99,7 +99,7 @@
     // Seeded route stops coordinate mapping for drawing route lines on the Leaflet canvas
     {% for route in routes %}
         const coords_{{ route.id }} = [];
-        {% for stop in route.stops.all %}
+        {% for stop in route.stops %}
             coords_{{ route.id }}.push([{{ stop.latitude }} + {{ offset_lat }}, {{ stop.longitude }} + {{ offset_lng }}]);
         {% endfor %}
         

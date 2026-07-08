@@ -6,6 +6,84 @@ from django.utils import timezone
 from .models import Bus, Route, Stop, StudentBusAssignment, BusLocationLog
 from school_os.helpers import school_has_feature
 
+ROUTE_LOCALIZATIONS = {
+    'IN': {
+        'Downtown East Route': 'Connaught Place Route',
+        'East Terminal Start': 'New Delhi Central Hub',
+        'Main Street Stop': 'Rajiv Chowk Crossing',
+        'Grand Avenue Stop': 'India Gate Boulevard',
+        'Elite School Campus Entrance': 'Silver Jubilee School Gate',
+        'North Hill Route': 'Noida Sector 62 Route',
+        'North Hill Stop 1': 'Sec-62 Metro Stop',
+        'North Hill Stop 2': 'Fortis Crossing Stop',
+        'North Hill Campus Stop': 'Amity Campus Stop',
+        'West Coast Route': 'Gurgaon Expressway Route',
+        'West Coast Stop 1': 'Cyber City Terminal',
+        'West Coast Stop 2': 'IFFCO Chowk Crossing',
+        'West Coast Campus Stop': 'DLF Phase 3 Stop',
+    },
+    'US': {
+        'Downtown East Route': 'Downtown East Route',
+        'East Terminal Start': 'East Terminal Start',
+        'Main Street Stop': 'Main Street Stop',
+        'Grand Avenue Stop': 'Grand Avenue Stop',
+        'Elite School Campus Entrance': 'Elite School Campus Entrance',
+        'North Hill Route': 'North Hill Route',
+        'North Hill Stop 1': 'North Hill Stop 1',
+        'North Hill Stop 2': 'North Hill Stop 2',
+        'North Hill Campus Stop': 'North Hill Campus Stop',
+        'West Coast Route': 'West Coast Route',
+        'West Coast Stop 1': 'West Coast Stop 1',
+        'West Coast Stop 2': 'West Coast Stop 2',
+        'West Coast Campus Stop': 'West Coast Campus Stop',
+    },
+    'GB': {
+        'Downtown East Route': 'London Bridge Expressway',
+        'East Terminal Start': 'King\'s Cross Station',
+        'Main Street Stop': 'Piccadilly Circus Circle',
+        'Grand Avenue Stop': 'Trafalgar Square Junction',
+        'Elite School Campus Entrance': 'Royal Academy Front Gate',
+        'North Hill Route': 'Hampstead Heath Route',
+        'North Hill Stop 1': 'Highgate Metro Stop',
+        'North Hill Stop 2': 'Golders Green Junction',
+        'North Hill Campus Stop': 'Hampstead Park Stop',
+        'West Coast Route': 'Thames Valley Route',
+        'West Coast Stop 1': 'Richmond Green Terminal',
+        'West Coast Stop 2': 'Kew Gardens Crossing',
+        'West Coast Campus Stop': 'Kingston Riverside Stop',
+    },
+    'CA': {
+        'Downtown East Route': 'Toronto Harbour Route',
+        'East Terminal Start': 'Union Station Hub',
+        'Main Street Stop': 'Yonge-Dundas Plaza',
+        'Grand Avenue Stop': 'CN Tower Parkway',
+        'Elite School Campus Entrance': 'Ontario College Entrance',
+        'North Hill Route': 'Scarborough Bluffs Route',
+        'North Hill Stop 1': 'Kennedy Subway Stop',
+        'North Hill Stop 2': 'Guildwood Crossing',
+        'North Hill Campus Stop': 'Bluffs Park Stop',
+        'West Coast Route': 'Mississauga Transit Route',
+        'West Coast Stop 1': 'Square One Terminal',
+        'West Coast Stop 2': 'Port Credit Crossing',
+        'West Coast Campus Stop': 'Lakeshore Road Stop',
+    },
+    'EU': {
+        'Downtown East Route': 'Seine Paris Rive Gauche',
+        'East Terminal Start': 'Gare du Nord Terminal',
+        'Main Street Stop': 'Champs-Élysées Avenue',
+        'Grand Avenue Stop': 'Place de la Concorde',
+        'Elite School Campus Entrance': 'Académie de Paris Gate',
+        'North Hill Route': 'Montmartre Route',
+        'North Hill Stop 1': 'Sacré-Cœur Metro',
+        'North Hill Stop 2': 'Pigalle Crossing',
+        'North Hill Campus Stop': 'Place du Tertre Stop',
+        'West Coast Route': 'Versailles Route',
+        'West Coast Stop 1': 'Palais de Versailles',
+        'West Coast Stop 2': 'Grand Trianon Crossing',
+        'West Coast Campus Stop': 'Le Parc Stop',
+    }
+}
+
 @login_required
 def bus_tracking_map(request):
     school = request.user.school
@@ -29,6 +107,28 @@ def bus_tracking_map(request):
     offset_lat = center['lat'] - 34.0522
     offset_lng = center['lng'] - (-118.2437)
 
+    # Localize routes and stop names
+    local_map = ROUTE_LOCALIZATIONS.get(selected_country, ROUTE_LOCALIZATIONS['IN'])
+    localized_routes = []
+    for r in routes:
+        loc_stops = []
+        for s in r.stops.all().order_by('sequence_order'):
+            loc_stops.append({
+                'id': s.id,
+                'name': local_map.get(s.name, s.name),
+                'latitude': s.latitude,
+                'longitude': s.longitude,
+                'arrival_time': s.arrival_time,
+                'sequence_order': s.sequence_order,
+            })
+        localized_routes.append({
+            'id': r.id,
+            'name': local_map.get(r.name, r.name),
+            'bus': r.bus,
+            'driver': r.driver,
+            'stops': loc_stops,
+        })
+
     # Get student's specific route if logged in as student or parent
     assigned_route = None
     if request.user.role == 'student':
@@ -41,7 +141,7 @@ def bus_tracking_map(request):
             if assignment: assigned_route = assignment.route
 
     return render(request, 'transport/bus_tracking.html', {
-        'routes': routes,
+        'routes': localized_routes,
         'buses': buses,
         'assigned_route': assigned_route,
         'has_premium_tracking': has_premium_tracking,
@@ -125,11 +225,15 @@ def get_bus_live_coords(request, bus_id):
     # Log location to database for audit history
     BusLocationLog.objects.create(bus=bus, latitude=lat + offset_lat, longitude=lon + offset_lng)
 
+    local_map = ROUTE_LOCALIZATIONS.get(selected_country, ROUTE_LOCALIZATIONS['IN'])
+    current_stop_localized = local_map.get(start_stop.name, start_stop.name)
+    next_stop_localized = local_map.get(end_stop.name, end_stop.name)
+
     return JsonResponse({
         'status': 'live',
         'latitude': lat + offset_lat,
         'longitude': lon + offset_lng,
-        'current_stop': start_stop.name,
-        'next_stop': end_stop.name,
+        'current_stop': current_stop_localized,
+        'next_stop': next_stop_localized,
         'eta_next': f"{int(max(5, (1.0 - fraction) * seconds_per_segment / 2))} mins"
     })
