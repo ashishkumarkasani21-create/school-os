@@ -286,6 +286,9 @@ def teacher_dashboard(request):
     # Announcements
     announcements = Announcement.objects.filter(school=school).filter(target_role__in=['all', 'teacher']).order_by('-created_at')[:5]
 
+    # All teachers in this school
+    all_teachers = TeacherProfile.objects.filter(school=school).select_related('user')
+
     context = {
         'teacher': teacher_prof,
         'timetable': timetable,
@@ -294,6 +297,7 @@ def teacher_dashboard(request):
         'homeworks': homeworks,
         'leaves': leaves,
         'announcements': announcements,
+        'all_teachers': all_teachers,
     }
     return render(request, 'reports/teacher_dashboard.html', context)
 

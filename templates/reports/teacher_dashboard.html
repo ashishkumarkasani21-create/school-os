@@ -213,6 +213,45 @@
             </div>
         </div>
         
+        <!-- School Faculty Directory -->
+        <div class="card">
+            <div class="card-header">
+                <span class="card-title"><i class="fa-solid fa-chalkboard-user"></i> School Faculty Directory</span>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 12px; max-height: 400px; overflow-y: auto; padding-right: 4px;">
+                {% for t in all_teachers %}
+                    <div style="background-color: var(--bg-primary); padding: 12px; border-radius: 8px; border: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; gap: 10px; transition: all 0.2s;">
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <div style="width: 36px; height: 36px; border-radius: 50%; background: linear-gradient(135deg, var(--primary-light), var(--accent-light)); display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; font-size: 14px; flex-shrink: 0;">
+                                {{ t.user.first_name|slice:":1" }}{{ t.user.last_name|slice:":1" }}
+                            </div>
+                            <div>
+                                <strong style="font-size: 13px; display: block; color: var(--text);">{{ t.user.get_full_name }}</strong>
+                                <span style="font-size: 11px; color: var(--text-muted); display: block;">Username: <code>{{ t.user.username }}</code></span>
+                                {% if t.classroom_set.all %}
+                                    <span style="font-size: 10px; background: rgba(99, 102, 241, 0.08); color: var(--primary); padding: 2px 6px; border-radius: 4px; font-weight: 600; display: inline-block; margin-top: 4px;">
+                                        Class: {% for c in t.classroom_set.all %}{{ c.name }}-{{ c.section }}{% endfor %}
+                                    </span>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <!-- Quick switch login -->
+                        <form action="{% url 'login' %}" method="post" style="margin: 0;">
+                            {% csrf_token %}
+                            <input type="hidden" name="username" value="{{ t.user.username }}">
+                            <input type="hidden" name="password" value="school123">
+                            <button type="submit" class="btn btn-secondary" style="padding: 4px 8px; font-size: 10px; font-weight: 700; white-space: nowrap;">
+                                <i class="fa-solid fa-arrow-right-to-bracket"></i> Login
+                            </button>
+                        </form>
+                    </div>
+                {% empty %}
+                    <p style="text-align: center; color: var(--text-muted); font-size: 13px;">No other teachers found.</p>
+                {% endfor %}
+            </div>
+        </div>
+
         <!-- Leave request form -->
         <div class="card">
             <div class="card-header">
