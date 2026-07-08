@@ -1,4 +1,4 @@
-﻿<div align="center">
+<div align="center">
 
 # 🎓 School OS
 
@@ -21,9 +21,9 @@ Multi-tenant school management platform for 3 schools with 21+ user accounts acr
 
 | Tier | School | Features |
 |------|--------|----------|
-| 🥈 **Silver** | Primary Stars School | Core academics, attendance, homework |
-| 🥇 **Gold** | Beacon Academy | + Finance, exams, timetable, OCR |
-| 💎 **Platinum** | Imperial Elite College | + Live GPS tracking, advanced OCR, analytics |
+| 🥈 **Silver** | Silver | Core academics, attendance, homework |
+| 🥇 **Gold** | Gold | + Finance, exams, timetable, OCR |
+| 💎 **Platinum** | Platinum | + Live GPS tracking, advanced OCR, analytics |
 
 ---
 
@@ -76,34 +76,34 @@ Open **http://localhost:8000**
 
 Password for all: **`school123`**
 
-### 🥈 Silver — Primary Stars School
+### 🥈 Silver
 | Role | Username |
 |------|----------|
-| Admin | `admin_silver_stars` |
-| Principal | `principal_silver_stars` |
-| Teacher | `teacher_silver_stars` |
-| Student | `student_silver_stars` |
+| Admin | `admin_silver` |
+| Principal | `principal_silver` |
+| Teacher | `teacher_silver` |
+| Student | `student_silver` |
 | Teacher (John) | `teacher_john` |
 
-### 🥇 Gold — Beacon Academy
+### 🥇 Gold
 | Role | Username |
 |------|----------|
-| Admin | `admin_gold_beacon` |
-| Principal | `principal_gold_beacon` |
-| Teacher | `teacher_gold_beacon` |
-| Accountant | `accountant_gold_beacon` |
+| Admin | `admin_gold` |
+| Principal | `principal_gold` |
+| Teacher | `teacher_gold` |
+| Accountant | `accountant_gold` |
 | Teacher (Ashish) | `teacher_ashish` |
 | Teacher (Swapna) | `teacher_swapna` |
 
-### 💎 Platinum — Imperial Elite College
+### 💎 Platinum
 | Role | Username |
 |------|----------|
-| Admin | `admin_platinum_imperial` |
-| Principal | `principal_platinum_imperial` |
-| Teacher | `teacher_platinum_imperial` |
-| Accountant | `accountant_platinum_imperial` |
-| Student | `student_platinum_imperial` |
-| Parent | `parent_platinum_imperial` |
+| Admin | `admin_platinum` |
+| Principal | `principal_platinum` |
+| Teacher | `teacher_platinum` |
+| Accountant | `accountant_platinum` |
+| Student | `student_platinum` |
+| Parent | `parent_platinum` |
 | Teacher (Olivia) | `teacher_olivia` |
 | Teacher (Mokshith) | `teacher_mokshith` |
 

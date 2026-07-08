@@ -52,9 +52,9 @@ class Command(BaseCommand):
         # 2. Setup Three Schools
         self.stdout.write("Creating Schools...")
         schools_data = [
-            ('Primary Stars School', 'silver-stars', silver_plan),
-            ('Beacon Academy', 'gold-beacon', gold_plan),
-            ('Imperial Elite College', 'platinum-imperial', platinum_plan),
+            ('Silver', 'silver', silver_plan),
+            ('Gold', 'gold', gold_plan),
+            ('Platinum', 'platinum', platinum_plan),
         ]
         
         schools = {}
@@ -340,9 +340,9 @@ class Command(BaseCommand):
 
         # 4. Seed custom teachers requested by user: Olivia, Mokshith, Ashish, Swapna, John
         self.stdout.write("Seeding custom teachers (Olivia, Mokshith, Ashish, Swapna, John)...")
-        silver_school = schools.get('silver-stars')
-        gold_school = schools.get('gold-beacon')
-        plat_school = schools.get('platinum-imperial')
+        silver_school = schools.get('silver')
+        gold_school = schools.get('gold')
+        plat_school = schools.get('platinum')
 
         custom_teachers = [
             ('Olivia',   'Smith',   'teacher_olivia',   plat_school,   'Grade 9',  'A'),

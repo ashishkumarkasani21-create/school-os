@@ -85,7 +85,7 @@
         /* ── Card ── */
         .login-wrapper {
             position:relative; z-index:10;
-            display:flex; max-width:860px; width:100%;
+            display:flex; max-width:1200px; width:100%;
             background:rgba(255,255,255,0.72);
             backdrop-filter:blur(28px) saturate(180%);
             -webkit-backdrop-filter:blur(28px) saturate(180%);
@@ -103,14 +103,14 @@
 
         /* ── Form side ── */
         .form-side {
-            flex:1; padding:50px 46px;
-            display:flex; flex-direction:column; justify-content:center; align-items:center; min-width:0;
+            flex:0 0 400px; padding:50px 44px;
+            display:flex; flex-direction:column; justify-content:center; align-items:center;
             text-align:center;
         }
         /* Make form elements full-width while form-side is centered */
         .form-side form, .form-side .country-bar, .form-side .alert-error,
-        .form-side .form-group, .form-side .btn-login { width:100%; max-width:340px; }
-        .brand { display:flex; align-items:center; justify-content:center; gap:14px; margin-bottom:38px; width:100%; max-width:340px; }
+        .form-side .form-group, .form-side .btn-login { width:100%; }
+        .brand { display:flex; align-items:center; justify-content:center; gap:14px; margin-bottom:38px; width:100%; }
         .brand-icon {
             width:48px; height:48px;
             background:linear-gradient(135deg,var(--primary),var(--accent));
@@ -330,7 +330,7 @@
                     <div class="input-wrap">
                         <i class="fa-solid fa-user"></i>
                         <input type="text" name="username" id="username" class="form-input"
-                            placeholder="e.g. admin_gold_beacon" required autocomplete="username">
+                            placeholder="e.g. admin_gold" required autocomplete="username">
                     </div>
                 </div>
                 <div class="form-group">
@@ -425,10 +425,10 @@
                             <span class="tier-badge badge-silver">Core</span>
                         </div>
                         <div class="role-grid">
-                            <div class="role-pill" onclick="fill('admin_silver_stars')">Admin</div>
-                            <div class="role-pill" onclick="fill('principal_silver_stars')">Principal</div>
-                            <div class="role-pill" onclick="fill('teacher_silver_stars')">Teacher</div>
-                            <div class="role-pill" onclick="fill('student_silver_stars')">Student</div>
+                            <div class="role-pill" onclick="fill('admin_silver')">Admin</div>
+                            <div class="role-pill" onclick="fill('principal_silver')">Principal</div>
+                            <div class="role-pill" onclick="fill('teacher_silver')">Teacher</div>
+                            <div class="role-pill" onclick="fill('student_silver')">Student</div>
                         </div>
                     </div>
 
@@ -439,10 +439,10 @@
                             <span class="tier-badge badge-gold">Standard</span>
                         </div>
                         <div class="role-grid">
-                            <div class="role-pill" onclick="fill('admin_gold_beacon')">Admin</div>
-                            <div class="role-pill" onclick="fill('principal_gold_beacon')">Principal</div>
-                            <div class="role-pill" onclick="fill('teacher_gold_beacon')">Teacher</div>
-                            <div class="role-pill" onclick="fill('accountant_gold_beacon')">Accountant</div>
+                            <div class="role-pill" onclick="fill('admin_gold')">Admin</div>
+                            <div class="role-pill" onclick="fill('principal_gold')">Principal</div>
+                            <div class="role-pill" onclick="fill('teacher_gold')">Teacher</div>
+                            <div class="role-pill" onclick="fill('accountant_gold')">Accountant</div>
                         </div>
                     </div>
 
@@ -453,12 +453,12 @@
                             <span class="tier-badge badge-platinum">Elite</span>
                         </div>
                         <div class="role-grid">
-                            <div class="role-pill" onclick="fill('admin_platinum_imperial')">Admin</div>
-                            <div class="role-pill" onclick="fill('principal_platinum_imperial')">Principal</div>
-                            <div class="role-pill" onclick="fill('teacher_platinum_imperial')">Teacher</div>
-                            <div class="role-pill" onclick="fill('accountant_platinum_imperial')">Accountant</div>
-                            <div class="role-pill" onclick="fill('student_platinum_imperial')">Student</div>
-                            <div class="role-pill" onclick="fill('parent_platinum_imperial')">Parent</div>
+                            <div class="role-pill" onclick="fill('admin_platinum')">Admin</div>
+                            <div class="role-pill" onclick="fill('principal_platinum')">Principal</div>
+                            <div class="role-pill" onclick="fill('teacher_platinum')">Teacher</div>
+                            <div class="role-pill" onclick="fill('accountant_platinum')">Accountant</div>
+                            <div class="role-pill" onclick="fill('student_platinum')">Student</div>
+                            <div class="role-pill" onclick="fill('parent_platinum')">Parent</div>
                         </div>
                     </div>
 
