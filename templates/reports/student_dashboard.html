@@ -55,9 +55,19 @@
                 <span class="card-title"><i class="fa-solid fa-book"></i> Pending Homework Assignments</span>
             </div>
             
+            <div style="padding: 0 0 16px 0;">
+                <label for="hw_subject_filter" style="font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; display: block; margin-bottom: 6px;">Filter by Subject</label>
+                <select id="hw_subject_filter" class="form-control" onchange="filterHomeworks()">
+                    <option value="">-- All Subjects --</option>
+                    {% for sub in classroom_subjects %}
+                        <option value="{{ sub.id }}">{{ sub.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
             <div style="display: flex; flex-direction: column; gap: 16px;">
                 {% for hw in homeworks %}
-                    <div style="background-color: var(--bg-primary); padding: 18px; border-radius: 10px; border: 1px solid var(--border);">
+                    <div class="homework-item" data-subject-id="{{ hw.subject.id }}" style="background-color: var(--bg-primary); padding: 18px; border-radius: 10px; border: 1px solid var(--border);">
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
                             <strong style="font-size: 15px;">{{ hw.title }}</strong>
                             <span style="font-size: 11px; font-weight: 600; color: var(--danger);">Due: {{ hw.due_date }}</span>
@@ -186,4 +196,18 @@
         </div>
     </div>
 </div>
+
+<script>
+    function filterHomeworks() {
+        const selectedSubjectId = document.getElementById('hw_subject_filter').value;
+        document.querySelectorAll('.homework-item').forEach(item => {
+            const subId = item.getAttribute('data-subject-id');
+            if (selectedSubjectId === "" || subId === selectedSubjectId) {
+                item.style.display = "block";
+            } else {
+                item.style.display = "none";
+            }
+        });
+    }
+</script>
 {% endblock %}

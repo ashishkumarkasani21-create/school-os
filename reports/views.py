@@ -323,8 +323,10 @@ def student_dashboard(request):
 
     # Homework assignments
     homeworks = []
+    classroom_subjects = []
     if class_room:
         homeworks = Homework.objects.filter(class_room=class_room).order_by('-due_date')[:10]
+        classroom_subjects = Subject.objects.filter(school=school, classsubject__class_room=class_room).distinct().order_by('name')
 
     # Student Marks Matrix Construction
     marks = Mark.objects.filter(student=student_prof).select_related('exam_schedule__subject', 'exam_schedule__exam')
@@ -375,6 +377,7 @@ def student_dashboard(request):
         'timetable': timetable,
         'attendance_rate': round(attendance_rate, 1),
         'homeworks': homeworks,
+        'classroom_subjects': classroom_subjects,
         'marks': marks,
         'report_card_subjects': subjects_list,
         'report_card_rows': report_card_rows,
