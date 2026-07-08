@@ -241,33 +241,55 @@ class Command(BaseCommand):
                 }
             )
 
-            # Exam & Exam Schedule
-            exam, _ = Exam.objects.get_or_create(
-                school=school,
-                name='Midterm Assessment',
-                defaults={
-                    'start_date': timezone.localdate() + datetime.timedelta(days=10),
-                    'end_date': timezone.localdate() + datetime.timedelta(days=15)
-                }
-            )
-            exam_sched, _ = ExamSchedule.objects.get_or_create(
-                exam=exam,
-                class_room=classroom,
-                subject=math_sub,
-                date=timezone.localdate() + datetime.timedelta(days=10),
-                defaults={
-                    'start_time': datetime.time(9, 0),
-                    'end_time': datetime.time(11, 0),
-                    'max_marks': 100
-                }
-            )
+            # Seeding Multiple Exams & Exam Schedules
+            exams_to_seed = [
+                ('Midterm Assessment', 10, 15),
+                ('Final Examination', 30, 35),
+                ('Unit Class Test', 5, 6),
+            ]
+            for exam_name, start_off, end_off in exams_to_seed:
+                exam, _ = Exam.objects.get_or_create(
+                    school=school,
+                    name=exam_name,
+                    defaults={
+                        'start_date': timezone.localdate() + datetime.timedelta(days=start_off),
+                        'end_date': timezone.localdate() + datetime.timedelta(days=end_off)
+                    }
+                )
+                
+                # Seed schedules for all subjects taught in this classroom
+                cls_subs = ClassSubject.objects.filter(class_room=classroom)
+                for cs in cls_subs:
+                    exam_sched, _ = ExamSchedule.objects.get_or_create(
+                        exam=exam,
+                        class_room=classroom,
+                        subject=cs.subject,
+                        date=timezone.localdate() + datetime.timedelta(days=start_off),
+                        defaults={
+                            'start_time': datetime.time(9, 0),
+                            'end_time': datetime.time(11, 0),
+                            'max_marks': 100
+                        }
+                    )
 
-            # Record a Grade
-            Mark.objects.get_or_create(
-                student=student_prof,
-                exam_schedule=exam_sched,
-                defaults={'marks_obtained': 88.5, 'remarks': 'Great effort!'}
-            )
+            # Record sample grades for Math and English Midterms
+            math_midterm_sched = ExamSchedule.objects.filter(exam__name='Midterm Assessment', class_room=classroom, subject=math_sub).first()
+            if math_midterm_sched:
+                Mark.objects.get_or_create(
+                    student=student_prof,
+                    exam_schedule=math_midterm_sched,
+                    defaults={'marks_obtained': 88.5, 'remarks': 'Great effort!'}
+                )
+
+            eng_sub = Subject.objects.filter(school=school, name__icontains='English').first()
+            if eng_sub:
+                eng_midterm_sched = ExamSchedule.objects.filter(exam__name='Midterm Assessment', class_room=classroom, subject=eng_sub).first()
+                if eng_midterm_sched:
+                    Mark.objects.get_or_create(
+                        student=student_prof,
+                        exam_schedule=eng_midterm_sched,
+                        defaults={'marks_obtained': 92.0, 'remarks': 'Excellent reading comprehension.'}
+                    )
 
             # Finance: Fee Structures & Student Fees
             fee_struct, _ = FeeStructure.objects.get_or_create(
