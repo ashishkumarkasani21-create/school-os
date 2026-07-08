@@ -20,6 +20,161 @@ from communication.models import Announcement, Complaint
 from leave_app.models import LeaveRequest
 from school_os.helpers import school_has_feature
 
+import datetime
+
+def setup_student_academics_and_fees(student_prof):
+    school = student_prof.school
+    classroom = student_prof.class_room
+    if not classroom:
+        return
+
+    # Ensure classroom has subjects and teachers assigned
+    primary_teacher_prof = TeacherProfile.objects.filter(school=school).first()
+    
+    # We want standard subjects: Mathematics, English Literature, Science, Social Studies, Computer Science
+    # Ensure subjects exist for this school
+    subjects_data = [
+        ('Mathematics', 'MATH'),
+        ('English Literature', 'ENG'),
+        ('Science', 'SCI'),
+        ('Social Studies', 'SOC'),
+        ('Computer Science', 'COMP'),
+    ]
+    subjects = []
+    for name, code in subjects_data:
+        sub, _ = Subject.objects.get_or_create(
+            school=school,
+            name=name,
+            defaults={'code': f"{code}{classroom.name.replace('Grade ', '').strip()}"}
+        )
+        subjects.append(sub)
+
+    # Link subjects to classroom
+    if primary_teacher_prof:
+        for sub in subjects:
+            ClassSubject.objects.get_or_create(
+                class_room=classroom,
+                subject=sub,
+                defaults={'teacher': primary_teacher_prof}
+            )
+
+    # Timetable Setup for classroom
+    math_sub = next((s for s in subjects if s.name == 'Mathematics'), None)
+    english_sub = next((s for s in subjects if s.name == 'English Literature'), None)
+    
+    if primary_teacher_prof:
+        if math_sub:
+            Timetable.objects.get_or_create(
+                class_room=classroom,
+                subject=math_sub,
+                teacher=primary_teacher_prof,
+                day_of_week='monday',
+                defaults={'start_time': datetime.time(9, 0), 'end_time': datetime.time(10, 0)}
+            )
+        if english_sub:
+            Timetable.objects.get_or_create(
+                class_room=classroom,
+                subject=english_sub,
+                teacher=primary_teacher_prof,
+                day_of_week='monday',
+                defaults={'start_time': datetime.time(10, 15), 'end_time': datetime.time(11, 15)}
+            )
+
+    # Attendance Log (Yesterday present)
+    Attendance.objects.get_or_create(
+        student=student_prof,
+        date=timezone.localdate() - datetime.timedelta(days=1),
+        defaults={'status': 'present'}
+    )
+
+    # Homework Setup for all subjects in this classroom
+    cls_subs = ClassSubject.objects.filter(class_room=classroom)
+    homework_titles = {
+        'Mathematics': ('Quadratic Equations Practice', 'Solve questions 1 to 10 from Chapter 4 of the algebra textbook.'),
+        'English Literature': ('Shakespeare\'s Macbeth Review', 'Write a 500-word analysis on the themes of ambition and guilt in Act 3.'),
+        'Science': ('Photosynthesis Lab Report', 'Summarize the light-dependent and light-independent reactions of photosynthesis.'),
+        'Physics': ('Newtonian Mechanics Exercises', 'Complete the force vector diagrams and resolve mass calculations for page 8.'),
+        'Chemistry': ('Periodic Table Trends Study', 'Review atomic radius, ionization energy, and electronegativity trends.'),
+        'Computer Science': ('Python Control Flow Coding', 'Write a program to calculate prime numbers up to 100 using nested loops.'),
+    }
+    
+    for cs in cls_subs:
+        sub_name = cs.subject.name
+        title, desc = homework_titles.get(sub_name, (f'{sub_name} Chapter Exercise', f'Read Chapter 2 and complete the questions at the end of the section.'))
+        if cs.teacher:
+            Homework.objects.get_or_create(
+                class_room=classroom,
+                subject=cs.subject,
+                teacher=cs.teacher,
+                title=title,
+                defaults={
+                    'description': desc,
+                    'due_date': timezone.localdate() + datetime.timedelta(days=3)
+                }
+            )
+
+    # Exams, ExamSchedules & Marks
+    exams_to_seed = [
+        ('Midterm Assessment', 10, 15),
+        ('Final Examination', 30, 35),
+        ('Unit Class Test', 5, 6),
+    ]
+    for exam_name, start_off, end_off in exams_to_seed:
+        exam, _ = Exam.objects.get_or_create(
+            school=school,
+            name=exam_name,
+            defaults={
+                'start_date': timezone.localdate() + datetime.timedelta(days=start_off),
+                'end_date': timezone.localdate() + datetime.timedelta(days=end_off)
+            }
+        )
+        for cs in cls_subs:
+            ExamSchedule.objects.get_or_create(
+                exam=exam,
+                class_room=classroom,
+                subject=cs.subject,
+                date=timezone.localdate() + datetime.timedelta(days=start_off),
+                defaults={
+                    'start_time': datetime.time(9, 0),
+                    'end_time': datetime.time(11, 0),
+                    'max_marks': 100
+                }
+            )
+    
+    # Seed sample midterm marks for the student
+    math_midterm_sched = ExamSchedule.objects.filter(exam__name='Midterm Assessment', class_room=classroom, subject__name='Mathematics').first()
+    if math_midterm_sched:
+        Mark.objects.get_or_create(
+            student=student_prof,
+            exam_schedule=math_midterm_sched,
+            defaults={'marks_obtained': 88.5, 'remarks': 'Great effort!'}
+        )
+    
+    eng_midterm_sched = ExamSchedule.objects.filter(exam__name='Midterm Assessment', class_room=classroom, subject__name='English Literature').first()
+    if eng_midterm_sched:
+        Mark.objects.get_or_create(
+            student=student_prof,
+            exam_schedule=eng_midterm_sched,
+            defaults={'marks_obtained': 92.0, 'remarks': 'Excellent reading comprehension.'}
+        )
+
+    # Outstanding Invoices (Fees)
+    fee_struct, _ = FeeStructure.objects.get_or_create(
+        school=school,
+        fee_type='Tuition Fee',
+        defaults={'amount': 1500.00, 'class_room': classroom}
+    )
+    StudentFee.objects.get_or_create(
+        student=student_prof,
+        fee_structure=fee_struct,
+        defaults={
+            'due_date': timezone.localdate() + datetime.timedelta(days=30),
+            'amount': 1500.00,
+            'paid_amount': 0.00,
+            'status': 'unpaid'
+        }
+    )
+
 # Dashboard Access Decorator
 def role_required(allowed_roles):
     def decorator(view_func):
@@ -114,13 +269,14 @@ def admin_dashboard(request):
             if role == 'student':
                 class_id = request.POST.get('student_class')
                 classroom = ClassRoom.objects.filter(id=class_id, school=school).first() if class_id else None
-                StudentProfile.objects.create(
+                stud_prof = StudentProfile.objects.create(
                     user=new_user,
                     school=school,
                     student_id=f"STU-{new_user.id:04d}",
                     class_room=classroom,
                     roll_number=str(100 + new_user.id)
                 )
+                setup_student_academics_and_fees(stud_prof)
             elif role == 'teacher':
                 TeacherProfile.objects.create(
                     user=new_user,
@@ -206,8 +362,11 @@ def principal_dashboard(request):
     # Complaints
     complaints = Complaint.objects.filter(school=school).order_by('-created_at')[:5]
 
-    # Announcements
-    announcements = Announcement.objects.filter(school=school, target_role__in=['all', 'principal']).order_by('-created_at')[:5]
+    # Fetch all unpaid/partially paid fees (overdue/outstanding late fees)
+    overdue_fees = StudentFee.objects.filter(
+        student__school=school,
+        status__in=['unpaid', 'partially_paid']
+    ).select_related('student__user', 'student__class_room', 'fee_structure').order_by('due_date')
 
     context = {
         'total_students': total_students,
@@ -220,6 +379,8 @@ def principal_dashboard(request):
         'pending_ocr': pending_ocr,
         'complaints': complaints,
         'announcements': announcements,
+        'overdue_fees': overdue_fees,
+        'today': today,
     }
     return render(request, 'reports/principal_dashboard.html', context)
 
