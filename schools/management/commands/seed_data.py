@@ -338,4 +338,54 @@ class Command(BaseCommand):
                 }
             )
 
-        self.stdout.write(self.style.SUCCESS('Successfully seeded database with all roles, classes, fee tables, and bus routes!'))
+        # 4. Seed custom teachers requested by user: Olivia, Mokshith, Ashish, Swapna, John
+        self.stdout.write("Seeding custom teachers (Olivia, Mokshith, Ashish, Swapna, John)...")
+        silver_school = schools.get('silver-stars')
+        gold_school = schools.get('gold-beacon')
+        plat_school = schools.get('platinum-imperial')
+
+        custom_teachers = [
+            ('Olivia',   'Smith',   'teacher_olivia',   plat_school,   'Grade 9',  'A'),
+            ('Mokshith', 'Kumar',   'teacher_mokshith', plat_school,   'Grade 10', 'B'),
+            ('Ashish',   'Kasani',  'teacher_ashish',   gold_school,   'Grade 8',  'A'),
+            ('Swapna',   'Reddy',   'teacher_swapna',   gold_school,   'Grade 7',  'B'),
+            ('John',     'Martin',  'teacher_john',     silver_school, 'Grade 6',  'A'),
+        ]
+
+        for first, last, username, school, class_name, section in custom_teachers:
+            if not school:
+                continue
+            # Create user
+            user, created = User.objects.get_or_create(
+                username=username,
+                defaults={
+                    'first_name': first,
+                    'last_name': last,
+                    'email': f'{username}@schoolos.edu',
+                    'role': 'teacher',
+                    'school': school,
+                }
+            )
+            if created or not user.has_usable_password():
+                user.set_password('school123')
+                user.save()
+
+            # Create classroom if not exist
+            classroom, _ = ClassRoom.objects.get_or_create(
+                school=school,
+                name=class_name,
+                section=section,
+            )
+
+            # Create teacher profile
+            profile, _ = TeacherProfile.objects.get_or_create(
+                user=user,
+                defaults={'school': school}
+            )
+
+            # Assign teacher to classroom
+            classroom.class_teacher = profile
+            classroom.save()
+
+        self.stdout.write(self.style.SUCCESS('Successfully seeded database with all roles, classes, fee tables, bus routes, and custom teachers!'))
+
