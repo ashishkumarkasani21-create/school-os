@@ -273,9 +273,9 @@ def teacher_dashboard(request):
     # Timetable
     timetable = Timetable.objects.filter(teacher=teacher_prof).select_related('class_room', 'subject')
 
-    # Classes and subjects taught
-    class_subjects = ClassSubject.objects.filter(teacher=teacher_prof).select_related('class_room', 'subject')
-    classes = list(set(cs.class_room for cs in class_subjects))
+    # Classes and subjects for the entire school to allow selecting any grade
+    classes = ClassRoom.objects.filter(school=school).prefetch_related('students__user').order_by('name', 'section')
+    class_subjects = ClassSubject.objects.filter(class_room__school=school).select_related('class_room', 'subject').order_by('class_room__name', 'subject__name')
 
     # Homeworks assigned
     homeworks = Homework.objects.filter(teacher=teacher_prof).order_by('-date_assigned')[:10]
