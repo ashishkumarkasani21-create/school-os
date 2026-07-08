@@ -134,6 +134,11 @@ Password for all: **`school123`**
 
 | Version | Change |
 |---------|--------|
+| v1.4 | Subject-wise columns matrix report card on Student Dashboard |
+| v1.4 | Dynamic subject dropdown selection for Enter Marks (Teacher) and Homework (Student) |
+| v1.4 | Encouraging homework completion card with custom first-name greeting |
+| v1.4 | Principal Dashboard Late Fees Student Registry with ID, Name, Dues, and OVERDUE status |
+| v1.4 | Unified setup helper (seeding + registration) to instantly populate new students with active data |
 | v1.3 | Plans side panel freed — no height constraint |
 | v1.3 | Demo accounts directory added to login |
 | v1.3 | Silver/Gold/Platinum plan cards on login |
