@@ -229,17 +229,31 @@ class Command(BaseCommand):
                 defaults={'status': 'present'}
             )
 
-            # Homework Setup
-            Homework.objects.get_or_create(
-                class_room=classroom,
-                subject=math_sub,
-                teacher=teacher_prof,
-                title='Quadratic Equations Practice',
-                defaults={
-                    'description': 'Solve questions 1 to 10 from Chapter 4 of the algebra textbook.',
-                    'due_date': timezone.localdate() + datetime.timedelta(days=2)
-                }
-            )
+            # Seed Homework Setup for all subjects taught in this classroom
+            cls_subs = ClassSubject.objects.filter(class_room=classroom)
+            homework_titles = {
+                'Mathematics': ('Quadratic Equations Practice', 'Solve questions 1 to 10 from Chapter 4 of the algebra textbook.'),
+                'English Literature': ('Shakespeare\'s Macbeth Review', 'Write a 500-word analysis on the themes of ambition and guilt in Act 3.'),
+                'Science': ('Photosynthesis Lab Report', 'Summarize the light-dependent and light-independent reactions of photosynthesis.'),
+                'Physics': ('Newtonian Mechanics Exercises', 'Complete the force vector diagrams and resolve mass calculations for page 8.'),
+                'Chemistry': ('Periodic Table Trends Study', 'Review atomic radius, ionization energy, and electronegativity trends.'),
+                'Computer Science': ('Python Control Flow Coding', 'Write a program to calculate prime numbers up to 100 using nested loops.'),
+            }
+            
+            for cs in cls_subs:
+                sub_name = cs.subject.name
+                title, desc = homework_titles.get(sub_name, (f'{sub_name} Chapter Exercise', f'Read Chapter 2 and complete the questions at the end of the section.'))
+                if cs.teacher:
+                    Homework.objects.get_or_create(
+                        class_room=classroom,
+                        subject=cs.subject,
+                        teacher=cs.teacher,
+                        title=title,
+                        defaults={
+                            'description': desc,
+                            'due_date': timezone.localdate() + datetime.timedelta(days=3)
+                        }
+                    )
 
             # Seeding Multiple Exams & Exam Schedules
             exams_to_seed = [
