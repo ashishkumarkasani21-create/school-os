@@ -482,11 +482,12 @@ def student_dashboard(request):
     present_days = attendances.filter(status='present').count()
     attendance_rate = (present_days / total_days * 100) if total_days > 0 else 100.0
 
-    # Homework assignments
+    # Homework assignments (exclude already submitted ones)
     homeworks = []
     classroom_subjects = []
     if class_room:
-        homeworks = Homework.objects.filter(class_room=class_room).order_by('-due_date')[:10]
+        submitted_ids = HomeworkSubmission.objects.filter(student=student_prof).values_list('homework_id', flat=True)
+        homeworks = Homework.objects.filter(class_room=class_room).exclude(id__in=submitted_ids).order_by('-due_date')[:10]
         classroom_subjects = Subject.objects.filter(school=school, classsubject__class_room=class_room).distinct().order_by('name')
 
     # Student Marks Matrix Construction
